@@ -1,0 +1,74 @@
+import {escapeHtml as esc} from './shared/model.mjs';
+import {STAGES} from './shared/tasting.mjs';
+import {icon,cover,reviewCard,normalizePost,stageOf,shortDate,entryImage,entryHeading} from './presentation.mjs';
+import {newId} from './identity.mjs';
+const validId=id=>/^[0-9a-f-]{36}$/i.test(id||'');
+export const publicLink=(kind,id)=>'https://maeum-gyeol.vercel.app/mobile/#'+kind+'/'+encodeURIComponent(id);
+const btn=(action,label,extra='',kind='secondary')=>`<button class="${kind}" data-social-action="${action}" ${extra}>${label}</button>`;
+const person=(id,name)=>`<button class="person-link" data-social-action="profile" data-id="${esc(id)}"><span class="avatar">${esc((name||'머무는 사람').slice(0,1))}</span><strong>${esc(name||'머무는 사람')}</strong></button>`;
+
+export function createSocialUI(ctx){
+ let epoch=0,busy=false,page='',feedRows=[],feedMode='all',feedStage='',hasMore=false,post=null,comments=[],commentId=null,commentOffset=0,moreComments=false,reactions={likes:0,liked:false},following=false,profileId=null,profileRows=[],profileMore=false;
+ async function begin(name){await ctx.leave();const token=++epoch;page=name;ctx.screen(name);ctx.main.innerHTML='<p class="loading" role="status">순간을 불러오고 있어요.</p>';return {token,uid:ctx.user()?.id};}
+ const current=t=>t.token===epoch&&ctx.current()===page&&t.uid===ctx.user()?.id;
+ const render=html=>{ctx.main.innerHTML=html;ctx.hydrate();};
+ function remember(kind,id){history.replaceState(null,'','#'+kind+(id?'/'+id:''));}
+ const cards=rows=>rows.map(reviewCard).join('');
+ const publicGrid=rows=>`<div class="moment-grid public-grid">${rows.map(p=>`<button class="moment-card" data-social-action="post" data-id="${esc(p.id)}">${cover(normalizePost(p))}<span class="stage-label">${esc(stageOf(p).label)}</span><span class="card-note">${esc(p.note)}</span></button>`).join('')}</div>`;
+ function fail(error){const offline=!navigator.onLine;render(`<section class="empty"><p class="eyebrow">MOMENTS, SHARED</p><h1>${offline?'연결되면 다시 만나요.':'이 순간을 열 수 없어요.'}</h1><p>${offline?'연결을 확인하고 다시 시도해주세요. 마음챙김 연습은 계속할 수 있어요.':'비공개로 바뀌었거나 삭제된 기록일 수 있어요. 잠시 뒤 다시 확인해주세요.'}</p>${btn('feed','공개된 순간 보기','','primary')}<button class="quiet" data-action="journal">내 기록 보기</button></section>`);}
+ async function feed(append=false){
+  const t=await begin('together');remember('together');if(!append)feedRows=[];
+  if(feedMode==='following'&&!ctx.user()){render(`<section class="empty"><h1>내가 고른 사람들의 순간</h1><p>로그인하고 마음에 남는 사람을 팔로우해보세요.</p><button class="primary" data-cloud-action="account">로그인</button>${btn('all','모두의 기록 보기')}</section>`);return;}
+  try{const rows=await ctx.cloud().feed(0,{following:feedMode==='following',stage:feedStage,cursor:append?feedRows.at(-1):null});if(!current(t))return;feedRows.push(...rows.filter(r=>!feedRows.some(e=>e.id===r.id)));hasMore=rows.length===20;renderFeed();}catch(error){if(current(t))fail(error);}
+ }
+ function renderFeed(){render(`<section class="community-feed"><div class="page-heading"><div><p class="eyebrow">THROUGH OTHER EYES</p><h1>발견</h1></div>${btn('people','사람 찾기','','small-button')}</div><div class="social-tabs" aria-label="기록 범위">${btn('all','모두',`aria-pressed="${feedMode==='all'}"`,'tab-button')}${btn('following','팔로잉',`aria-pressed="${feedMode==='following'}"`,'tab-button')}<label class="filter-select"><span class="sr-only">마음챙김 연습</span><select id="feed-stage"><option value="">모든 연습</option>${STAGES.map(s=>`<option value="${s.id}" ${feedStage===s.id?'selected':''}>${s.label}</option>`).join('')}</select></label></div><div class="feed-layout"><div class="feed-list">${feedRows.length?cards(feedRows):`<div class="empty"><h2>${feedMode==='following'?'새로운 시선을 만나볼까요?':'아직 나눈 순간이 없어요.'}</h2><p>${feedMode==='following'?'팔로우한 사람이 공개하는 순간이 이곳에 모여요.':'내 기록 중 함께 나누고 싶은 한 순간을 골라보세요.'}</p>${feedMode==='following'?btn('people','사람 찾기','','primary'):'<button class="primary" data-action="journal">내 기록 보기</button>'}</div>`}${hasMore?btn('more','이전 순간 더 보기'):''}</div><aside class="feed-aside"><p class="eyebrow">A LITTLE PRACTICE</p><h2>같은 연습,<br>서로 다른 알아차림.</h2><p>내 경험에서 떠오른 이야기를 건네보세요.</p><button class="secondary" data-action="start">3분 마음챙김 시작</button></aside></div></section>`);}
+ async function profile(id,append=false){
+  if(!validId(id))return;profileId=id;const t=await begin('profile');remember('profile',id);if(!append)profileRows=[];
+  try{const cloud=ctx.cloud();const [p,counts,featured,rows,follows]=await Promise.all([cloud.publicProfile(id),cloud.profileCounts(id),cloud.featured(id),cloud.feed(0,{owner:id,cursor:append?profileRows.at(-1):null}),ctx.user()&&ctx.user().id!==id?cloud.isFollowing(id):false]);if(!current(t))return;
+   profileRows.push(...rows.filter(r=>!profileRows.some(e=>e.id===r.id)));profileMore=rows.length===20;following=follows;const own=id===ctx.user()?.id;
+   render(`<section class="public-profile"><div class="profile-banner"><p class="eyebrow">A LIFE, NOTICED</p><span class="profile-initial">${esc(p.name.slice(0,1))}</span><h1>${esc(p.name)}</h1>${p.bio?`<p class="profile-bio">${esc(p.bio)}</p>`:''}<div class="profile-counts"><span><strong>${counts.entries}</strong> 공개 기록</span><span><strong>${counts.followers}</strong> 팔로워</span><span><strong>${counts.following}</strong> 팔로잉</span></div><div class="profile-actions">${own?'<button class="secondary compact" data-cloud-action="account">프로필 수정</button>':btn('follow',following?'팔로잉':'팔로우',`data-id="${id}" aria-pressed="${following}"`,'primary compact')}${btn('share-profile',icon('share')+' 프로필 공유',`data-id="${id}"`,'quiet')}${!own&&ctx.user()?btn('block-preview','차단',`data-id="${id}"`,'quiet'):''}</div></div>${featured.length?'<section class="profile-favorites"><div class="section-title"><h2>오래 남겨둘 순간</h2><span class="count">'+featured.length+' / 4</span></div>'+publicGrid(featured)+'</section>':''}<div class="section-title"><h2>나눈 순간</h2><span class="count">최근 기록부터</span></div>${profileRows.length?publicGrid(profileRows):'<div class="empty"><h2>아직 공개한 기록이 없어요.</h2><p>함께 나눈 순간들이 이곳에 쌓여요.</p></div>'}${profileMore?btn('profile-more','이전 기록 더 보기',`data-id="${id}"`):''}</section>`);
+  }catch(error){if(current(t))fail(error);}
+ }
+ function commentMarkup(){return comments.map(c=>`<article class="cloud-comment"><div class="section-line">${person(c.author_id,c.author?.name)}<time>${esc(shortDate(c.created_at))}</time></div><p>${esc(c.body)}</p>${ctx.user()&&(c.author_id===ctx.user().id||post.owner_id===ctx.user().id)?btn('delete-comment-preview','삭제',`data-id="${c.id}"`,'danger'):''}</article>`).join('');}
+ async function showPost(id){
+  if(!validId(id))return;const t=await begin('public-entry');remember('post',id);
+  try{const cloud=ctx.cloud();const [p,rows,rx]=await Promise.all([cloud.entry(id),cloud.comments(id),cloud.reactions(id,ctx.user()?.id)]);if(!current(t))return;
+   post=p;comments=rows;reactions=rx;commentOffset=0;commentId=null;moreComments=rows.length===50;renderPost();
+  }catch(error){if(current(t))fail(error);}
+ }
+ function renderPost(){const p=post,r=normalizePost(p),own=p.owner_id===ctx.user()?.id;
+  render(`<article class="public-record">${entryImage(r)}<div class="record-copy">${entryHeading(r)}<div class="author-line">${person(p.owner_id,p.author?.name)}<time>${esc(shortDate(r.date))}</time><button class="stage-link" data-social-action="stage" data-stage="${esc(p.stage)}">${esc(stageOf(r).label)}${p.seconds?' · '+Math.max(1,Math.round(p.seconds/60))+'분':''}</button></div><p class="record-note">${esc(p.note)}</p><div class="discussion-heading"><h2 class="comments-heading">이 순간에 건네는 이야기</h2>${btn('like',icon('heart')+' '+reactions.likes,`aria-pressed="${reactions.liked}" aria-label="좋아요 ${reactions.likes}개"`,'reaction-button')}${btn('share-post',icon('share'),'aria-label="기록 링크 공유"','quiet')}</div><div id="social-comments">${comments.length?commentMarkup():'<p class="hint">아직 건넨 이야기가 없어요.</p>'}</div>${moreComments?btn('comments-more','댓글 더 보기'):''}${!own?btn('report-preview','신고','','quiet'):''}${p.comments_enabled===false?'<p class="hint">이 기록은 댓글을 받지 않아요.</p>':ctx.user()?'<form id="social-comment"><label class="field"><span>내 경험에서 떠오른 이야기</span><textarea name="body" required maxlength="1000" placeholder="이 순간을 읽으며 떠오른 나의 경험을 나눠주세요."></textarea></label><button class="primary" type="submit">댓글 남기기</button></form>':'<button class="primary" data-cloud-action="account">로그인하고 이야기 나누기</button>'}</div></article>`);
+ }
+ async function people(query=''){
+  const t=await begin('people');remember('people');try{const rows=await ctx.cloud().people(query);if(!current(t))return;
+   render(`<section><div class="page-heading"><div><p class="eyebrow">FIND YOUR PEOPLE</p><h1>서로의 시선</h1></div>${btn('feed','발견으로','','quiet')}</div><form id="social-search" class="search-form"><label class="sr-only" for="people-query">닉네임</label><input id="people-query" name="query" maxlength="40" value="${esc(query)}" placeholder="닉네임으로 찾기"><button class="small-button" type="submit">찾기</button></form><div class="people-list">${rows.length?rows.map(p=>`<article class="person-row">${person(p.id,p.name)}${p.bio?`<p>${esc(p.bio)}</p>`:''}${p.id===ctx.user()?.id?'<span class="hint">내 프로필</span>':''}</article>`).join(''):'<div class="empty"><h2>아직 찾지 못했어요.</h2><p>닉네임을 다시 확인해주세요.</p></div>'}</div></section>`);
+  }catch(error){if(current(t))fail(error);}
+ }
+ async function notifications(){if(!ctx.user())return ctx.account();const t=await begin('notifications');remember('notifications');try{const rows=await ctx.cloud().notifications();if(!current(t))return;render(`<section><p class="eyebrow">LITTLE CONNECTIONS</p><h1>나에게 온 소식</h1><div class="notification-list">${rows.length?rows.map(n=>`<button class="notification-row" data-social-action="${n.entry_id?'post':'profile'}" data-id="${n.entry_id||n.actor_id}"><span class="avatar">${esc((n.actor?.name||'머무는 사람').slice(0,1))}</span><span><strong>${esc(n.actor?.name||'머무는 사람')}</strong>님이 ${n.kind==='follow'?'나를 팔로우했어요.':n.kind==='like'?'내 순간을 좋아해요.':'내 순간에 이야기를 건넸어요.'}<time>${esc(shortDate(n.created_at))}</time></span></button>`).join(''):'<div class="empty"><h2>아직 도착한 소식이 없어요.</h2><p>팔로우와 댓글, 좋아요 소식이 이곳에 모여요.</p></div>'}</div></section>`);}catch(error){if(current(t))fail(error);}}
+ async function blocks(){if(!ctx.user())return ctx.account();const t=await begin('blocks');const rows=await ctx.cloud().blocks();if(!current(t))return;render(`<section><h1>차단한 계정</h1><p class="hint">차단한 계정의 프로필은 숨겨져 있어요.</p>${rows.length?rows.map((p,i)=>`<div class="settings-row"><span>차단한 계정 ${i+1} · ${esc(p.blocked_id.slice(0,8))}</span>${btn('unblock','차단 해제',`data-id="${p.blocked_id}"`,'small-button')}</div>`).join(''):'<p class="lead">차단한 계정이 없어요.</p>'}</section>`);}
+ async function action(a,el){
+  if(a==='feed')return feed();if(a==='all'||a==='following'){feedMode=a;return feed();}if(a==='more')return feed(true);
+  if(a==='post')return showPost(el.dataset.id);if(a==='profile')return profile(el.dataset.id);if(a==='profile-more')return profile(el.dataset.id,true);
+  if(a==='people')return people();if(a==='notifications')return notifications();if(a==='blocks')return blocks();
+  if(a==='stage'){feedStage=el.dataset.stage;feedMode='all';return feed();}
+  if(a==='follow'){if(!ctx.user())return ctx.account();await ctx.cloud().follow(el.dataset.id,!following);return profile(el.dataset.id);}
+  if(a==='like'){if(!ctx.user())return ctx.account();const id=post.id;await ctx.cloud().like(id,!reactions.liked);if(ctx.current()==='public-entry'&&post.id===id){reactions=await ctx.cloud().reactions(id,ctx.user().id);el.innerHTML=icon('heart')+' '+reactions.likes;el.setAttribute('aria-pressed',String(reactions.liked));el.setAttribute('aria-label','좋아요 '+reactions.likes+'개');}return;}
+  if(a==='share-post'||a==='share-profile'){await ctx.shareMoment(publicLink(a==='share-post'?'post':'profile',a==='share-post'?post.id:el.dataset.id));ctx.toast('공유 링크를 준비했어요.');return;}
+  if(a==='comments-more'){const id=post.id,rows=await ctx.cloud().comments(id,commentOffset+50);if(ctx.current()!=='public-entry'||post.id!==id)return;commentOffset+=50;comments.push(...rows.filter(r=>!comments.some(e=>e.id===r.id)));moreComments=rows.length===50;ctx.main.querySelector('#social-comments').innerHTML=commentMarkup();if(!moreComments)el.remove();return;}
+  if(a==='delete-comment-preview'){ctx.popup('댓글을 지울까요?','<p>삭제한 댓글은 되돌릴 수 없어요.</p>',btn('delete-comment','댓글 삭제',`data-id="${el.dataset.id}"`,'danger'));return;}
+  if(a==='delete-comment'){await ctx.cloud().deleteComment(el.dataset.id);ctx.closeDialog();return showPost(post.id);}
+  if(a==='block-preview'){ctx.popup('이 계정을 차단할까요?','<p>서로의 팔로우가 해제되고, 로그인한 화면에서 기록과 반응이 숨겨져요. 공개 글은 로그아웃한 방문자에게는 보일 수 있어요.</p>',btn('block','차단하기',`data-id="${el.dataset.id}"`,'danger'));return;}
+  if(a==='block'){await ctx.cloud().block(el.dataset.id,true);ctx.closeDialog();ctx.toast('차단했어요. 계정 화면에서 해제할 수 있어요.');return feed();}
+  if(a==='unblock'){await ctx.cloud().block(el.dataset.id,false);return blocks();}
+  if(a==='report-preview'){if(!ctx.user())return ctx.account();ctx.popup('이 기록을 신고하기','<form id="social-report"><label class="field"><span>신고 이유</span><select name="reason"><option value="spam">광고·도배</option><option value="harassment">괴롭힘·혐오 표현</option><option value="privacy">개인정보 노출</option><option value="other">그 밖의 문제</option></select></label><button class="primary" type="submit">신고 접수</button></form>','');return;}
+ }
+ async function run(fn,el){if(busy)return;busy=true;if(el)el.disabled=true;try{await fn();}catch(error){ctx.toast(error.message||'연결을 확인하고 다시 시도해주세요.');}finally{busy=false;if(el?.isConnected)el.disabled=false;}}
+ document.addEventListener('click',e=>{const el=e.target.closest('[data-social-action]');if(el)run(()=>action(el.dataset.socialAction,el),el);});
+ document.addEventListener('change',e=>{if(e.target.id==='feed-stage'){feedStage=e.target.value;run(()=>feed());}});
+ document.addEventListener('submit',e=>{const f=e.target;if(!f.id.startsWith('social-'))return;e.preventDefault();run(async()=>{
+  if(f.id==='social-search')return people(f.elements.query.value);
+  if(f.id==='social-report'){await ctx.cloud().report(post.id,f.elements.reason.value);ctx.closeDialog();ctx.toast('신고를 접수했어요.');return;}
+  if(f.id==='social-comment'){const body=f.elements.body.value.trim();if(!body)return;commentId||=newId();await ctx.cloud().comment(post.id,body,commentId);return showPost(post.id);}
+ },f.querySelector('button[type="submit"]'));});
+ return {feed,showPost,profile,people,notifications,blocks};
+}

@@ -1,0 +1,16 @@
+node_modules/
+dist/server/
+dist/.openai/
+dist/mobile/
+.env
+.env.*
+!.env.example
+*.keystore
+*.jks
+*.p12
+*.mobileprovision
+.wrangler/
+.sites-runtime/
+.vercel/
+vercel-dist/
+supabase/.temp/

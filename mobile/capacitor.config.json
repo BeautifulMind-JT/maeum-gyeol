@@ -1,0 +1,12 @@
+{
+  "appId": "app.maeumgyeol.mobile",
+  "appName": "마음결",
+  "webDir": "www",
+  "backgroundColor": "#0864ad",
+  "ios": {
+    "contentInset": "automatic"
+  },
+  "android": {
+    "allowMixedContent": false
+  }
+}
