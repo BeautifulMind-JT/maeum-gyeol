@@ -1,14 +1,15 @@
 import {createClient} from './vendor/supabase.mjs';
 import {socialCloud} from './social-cloud.mjs';
 import {publicRecords} from './public-records.mjs';
-export async function loadCloud(storage){
+import {createGoogleLogin} from './oauth.mjs';
+export async function loadCloud(storage,{native=false}={}){
  const response=await fetch('./cloud-config.json',{cache:'no-store'});
  if(!response.ok)throw Error('계정 연결 설정을 불러오지 못했어요.');
  const config=await response.json();
  if(!config.url&&!config.publishableKey)return null;
  if(!/^https:\/\/[a-z0-9-]+\.supabase\.co$/.test(config.url)||!config.publishableKey.startsWith('sb_publishable_'))throw Error('계정 연결 설정을 확인해주세요.');
  const storageKey='maeum-'+new URL(config.url).hostname;
- const client=createClient(config.url,config.publishableKey,{auth:{storage,storageKey,persistSession:true,autoRefreshToken:true,detectSessionInUrl:false},global:{fetch:(url,init)=>fetch(url,{...init,cache:'no-store',signal:init?.signal||AbortSignal.timeout(20000)})}});
+ const client=createClient(config.url,config.publishableKey,{auth:{storage,storageKey,persistSession:true,autoRefreshToken:true,detectSessionInUrl:false,flowType:'pkce'},global:{fetch:(url,init)=>fetch(url,{...init,cache:'no-store',signal:init?.signal||AbortSignal.timeout(20000)})}});
  const unwrap=async p=>{const {data,error}=await p;if(error)throw error;return data;};
  async function user(){try{const s=await unwrap(client.auth.getSession());return s.session?.user||null;}catch(error){if(error.name!=='AuthRetryableFetchError')throw error;const cached=JSON.parse(await storage.getItem(storageKey)||'null');return cached?.user?.id?cached.user:null;}}
  const account=async()=>{const u=await user();if(!u)throw Error('로그인해주세요.');return u;};
@@ -20,6 +21,7 @@ export async function loadCloud(storage){
   legacyAppUrl:config.legacyAppUrl||'',
   scope:new URL(config.url).hostname.split('.')[0],
   user,
+  google:createGoogleLogin({auth:client.auth,baseUrl:config.url,publishableKey:config.publishableKey,native}),
   onAuth:fn=>client.auth.onAuthStateChange((_event,session)=>{setTimeout(()=>fn(session?.user||null),0);}),
   sendCode:email=>unwrap(client.auth.signInWithOtp({email,options:{shouldCreateUser:true}})),
   verifyCode:(email,token)=>unwrap(client.auth.verifyOtp({email,token,type:'email'})),

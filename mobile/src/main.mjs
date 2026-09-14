@@ -7,18 +7,20 @@ import {shareText} from './storage.mjs';
 import {native,storageAdapter,createStorageAdapter,createAuthStorage,openCommunity,shareMoment,savePhoto,speak,stopSpeech,bindLifecycle,minimize} from './runtime.mjs';
 import {createServerJournal} from './server-journal.mjs';
 import {loadCloud} from './cloud.mjs';
+import {captureOAuthCallback} from './oauth.mjs';
 import {createCloudUI} from './cloud-ui.mjs';
 import {icon,stageOf,cover,momentCard,reviewCard,stats,emptyJournal,entryImage,entryHeading} from './presentation.mjs';
 document.querySelectorAll('[data-icon]').forEach(el=>{el.innerHTML=icon(el.dataset.icon);});
 const main=document.querySelector('main'),dialog=document.querySelector('dialog'),dialogContent=document.querySelector('#dialog-content');
 let journal=null,cloud=null,accountUser=null,cloudError='',syncState='',authEpoch=0,authReady=Promise.resolve(),legacyError='',pendingIntent=null;
+let authCallbackPending=false;
 let draftDirty=false,draftGeneration=0,finishSnapshot=null,archiveRows=[],draftFailure=null;
 let view='home',draft=null,record=null,clock=null,voice=true,speechError='',cueKey='',viewEpoch=0,toastTimer,draftTimer,saving=false;
 const photos=createPhotoLoader(()=>cloud);
 let photoUpload=null,archiveQuery='',archiveStage='',archiveLayout='grid';
 const dateLabel=d=>new Intl.DateTimeFormat('ko-KR',{year:'numeric',month:'long',day:'numeric'}).format(new Date(d));
 function toast(text){const el=document.querySelector('.toast');el.textContent=text;el.classList.add('visible');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('visible'),4200);}
-const cloudUI=createCloudUI({main,native,hydrate:()=>photos.hydrate(main),shareMoment,cloud:()=>cloud,user:()=>accountUser,journal:()=>journal,legacyInfo,importLegacyGuest,importLegacyAccount,legacyError:()=>legacyError,afterLogin,record:()=>record,cloudError:()=>cloudError,syncState:()=>syncState,current:()=>view,leave,screen,popup,toast,settings,list,detail,closeDialog:()=>dialog.close(),sync:()=>syncCloud(),changeUser});
+const cloudUI=createCloudUI({main,native,hydrate:()=>photos.hydrate(main),shareMoment,cloud:()=>cloud,user:()=>accountUser,journal:()=>journal,legacyInfo,importLegacyGuest,importLegacyAccount,legacyError:()=>legacyError,afterLogin,startGoogle,googleLoginBlocked,record:()=>record,cloudError:()=>cloudError,syncState:()=>syncState,current:()=>view,leave,screen,popup,toast,settings,list,detail,closeDialog:()=>dialog.close(),sync:()=>syncCloud(),changeUser});
 async function syncCloud({quiet=false}={}){
  if(!journal)return;const j=journal;
  try{await j.sync();if(j!==journal)return;syncState='기록은 내 계정에 보관돼요.';cloud.cleanupPhotos({includeDrafts:true}).catch(()=>{});}
@@ -36,6 +38,8 @@ function changeUser(user){
 }
 async function requireAccount(intent){if(accountUser&&journal)return true;pendingIntent=intent;await cloudUI.account();return false;}
 async function afterLogin(){await authReady;const intent=pendingIntent;pendingIntent=null;if(intent?.kind==='editor')return editor(intent.value);if(intent?.kind==='journal')return list();return cloudUI.account();}
+function googleLoginBlocked(){return Boolean(pendingIntent?.value||clock?.elapsed>0||draftDirty||finishSnapshot);}
+async function startGoogle(){if(native||googleLoginBlocked())throw Error('지금 남기던 순간을 이어가려면 이메일로 로그인해주세요.');const epoch=viewEpoch,user=accountUser;await leave();await cloud.google.start(pendingIntent?.kind||'account',()=>epoch===viewEpoch&&user===accountUser&&!googleLoginBlocked());}
 function screen(name){photos.release();if(['home','journal','settings','account','entry','editor','practice'].includes(name))history.replaceState(null,'','#'+(['entry','editor'].includes(name)?'journal':name==='practice'?'home':name));view=name;viewEpoch++;document.body.dataset.view=name;document.body.classList.toggle('practicing',name==='practice');const active=['entry','editor'].includes(name)?'journal':['public-entry','profile','people','notifications'].includes(name)?'together':name==='account'?'settings':name;document.querySelectorAll('.main-nav button').forEach(b=>b.setAttribute('aria-current',b.dataset.action===active?'page':'false'));document.querySelector('.header-back').hidden=!['entry','public-entry','editor'].includes(name);document.querySelector('.main-nav [data-icon=home]').innerHTML=icon(active==='home'?'home-fill':'home');main.focus({preventScroll:true});window.scrollTo(0,0);return viewEpoch;}
 function popup(title,body,actions){dialogContent.innerHTML=`<h2>${title}</h2>${body}<div class="dialog-actions">${actions}<button class="quiet" data-action="close">돌아가기</button></div>`;if(!dialog.open)dialog.showModal();}
 function pause(){if(clock?.running){clock.pause(performance.now());stopSpeech();if(view==='practice')updatePlayer();}}
@@ -132,6 +136,7 @@ async function detail(r,shouldLeave=true){if(!r)throw Error('기록을 다시 �
 async function together(){if(cloud)return cloudUI.feed();await leave();screen('together');main.innerHTML=`<section><p class="eyebrow">SHARED MOMENTS</p><h1>각자의 순간에,<br>잠시 머물러요.</h1><p class="lead">같은 연습, 서로 다른 알아차림.<br>경험을 읽고 내 이야기를 건네보세요.</p><div class="community-card"><h2>마음결 온라인 공간</h2><p>공개된 기록을 읽고 댓글을 나눌 수 있어요. 로그인과 공개 기록 작성은 브라우저에서 이어져요.</p><button class="primary" data-action="open-community">공개된 순간 만나기 →</button></div><p class="hint">앱에 저장한 개인 기록은 자동으로 올라가지 않아요.</p></section>`;}
 async function settings(){await leave();screen('settings');main.innerHTML=`<section class="settings-page"><p class="eyebrow">MY SPACE</p><h1>나의 공간</h1><div class="settings-row"><div><h2>내 계정</h2><p>${accountUser?esc(accountUser.email||'로그인됨'):'로그인하고 여러 기기에서 이어봐요.'}</p></div><button class="small-button" data-cloud-action="account">${accountUser?'계정 관리':'로그인'}</button></div><div class="settings-about"><h2>마음결</h2><p>일상의 감각에 주의를 기울이고, 떠오르는 마음을 판단 없이 알아차리는 연습.</p><ol class="method-list"><li><b>01</b><div><h3>알아차림</h3><p>지금 주의가 어디에 있는지 살펴봐요.</p></div></li><li><b>02</b><div><h3>허용하기</h3><p>떠오르는 느낌을 바꾸려 하지 않아요.</p></div></li><li><b>03</b><div><h3>돌아오기</h3><p>흩어진 주의를 감각으로 데려와요.</p></div></li><li><b>04</b><div><h3>머무르기</h3><p>잘했는지 판단하지 않고 잠시 머물러요.</p></div></li></ol><p>와인이 없어도 괜찮아요. 일상의 어떤 감각에서든 시작할 수 있어요.</p><p class="hint">연습은 로그인 없이 사용할 수 있어요. 기록과 사진, 작성 중인 글은 로그인 후 내 계정에 보관돼요.</p></div></section>`;}
 async function action(a,el){
+ if(authCallbackPending)return;
  if(a==='back')return view==='public-entry'?together():list();
  if(a==='retry-draft')return finishSnapshot?save():flushDraft();
  if(a==='copy-draft'){captureDraft();await shareMoment([draft.context,draft.wineName,draft.vintage,draft.note,...draft.conversation.map(m=>m.text)].filter(Boolean).join('\n\n'));return;}
@@ -171,12 +176,33 @@ document.addEventListener('change',e=>{if(e.target.id==='archive-stage'){archive
 bindLifecycle({pause,back:()=>{if(dialog.open)dialog.close();else if(view==='home')minimize().catch(e=>toast(e.message));else (view==='entry'||view==='editor'?list():view==='public-entry'?together():view==='account'?settings():home()).catch(e=>toast(e.message));}}).catch(()=>{});
 if(!native&&location.hostname!=='terminal.local'&&'serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js',{updateViaCache:'none'}).catch(()=>{});
 async function routeHash(){
+ if(authCallbackPending)return;
  const [name,id]=location.hash.slice(1).split('/');
  if(name==='home')return home();if(name==='settings')return settings();if(name==='account')return cloudUI.account();if(name==='together')return together();if(name==='journal')return list();
  if(!cloud)return;
  if(name==='post')return cloudUI.showPost(id);if(name==='profile')return cloudUI.profile(id);if(name==='people')return cloudUI.people();if(name==='notifications')return cloudUI.notifications();
 }
-async function initialize(){const initialHash=location.hash;await home();try{cloud=await loadCloud(createAuthStorage());if(cloud){await changeUser(await cloud.user());cloud.onAuth(user=>changeUser(user).catch(error=>toast(error.message)));}}catch(error){cloudError=error.message;toast('계정 연결을 확인하지 못했어요. 마음챙김 연습은 사용할 수 있어요.');}if(view==='home')loadHomeFeed(viewEpoch);if(initialHash)history.replaceState(null,'',initialHash);await routeHash();}
+async function initialize(){
+ const callback=captureOAuthCallback(location,history),initialHash=location.hash;
+ let googleIntent=null,googleError='';
+ if(callback.active){authCallbackPending=true;document.body.inert=true;main.innerHTML='<p class="loading">로그인을 확인하고 있어요.</p>';}
+ try{
+ if(!callback.active)await home();
+ try{
+  cloud=await loadCloud(createAuthStorage(),{native});
+  if(cloud){
+   if(callback.active){try{googleIntent=await cloud.google.finish(callback);}catch{googleError='구글 로그인을 마치지 못했어요. 다시 시도하거나 이메일로 로그인해주세요.';}}
+   await changeUser(await cloud.user());
+   cloud.onAuth(user=>changeUser(user).catch(error=>toast(error.message)));
+  }
+ }catch(error){cloudError=error.message;toast('계정 연결을 확인하지 못했어요. 마음챙김 연습은 사용할 수 있어요.');}
+ if(callback.active){
+  if(googleIntent&&accountUser){pendingIntent={kind:googleIntent};toast('로그인했어요.');return await afterLogin();}
+  await cloudUI.account();toast(googleError||'계정 연결을 확인하지 못했어요. 다시 로그인해주세요.');return;
+ }
+ if(view==='home')loadHomeFeed(viewEpoch);if(initialHash)history.replaceState(null,'',initialHash);await routeHash();
+ }finally{if(callback.active){authCallbackPending=false;document.body.inert=false;main.focus({preventScroll:true});}}
+}
 window.addEventListener('hashchange',()=>routeHash().catch(e=>toast(e.message)));
 window.addEventListener('beforeunload',e=>{if(draftDirty||finishSnapshot||journal?.hasPending()){e.preventDefault();e.returnValue='';}});
 window.addEventListener('online',()=>{if(view==='editor'&&draftDirty&&!finishSnapshot)flushDraft().catch(()=>{});else syncCloud({quiet:true});});
