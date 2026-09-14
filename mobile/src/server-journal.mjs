@@ -49,15 +49,17 @@ export function createServerJournal(remote){
   pendingEntries.set(r.id,sent);return copy(await sendEntry(sent));
  }
  const api={
-  list:()=>serial(async()=>{const rows=(await remote.pull()).map(fromServer);entries.clear();for(const r of rows)entries.set(r.id,r);return rows.filter(r=>!r.deleted).sort((a,b)=>Date.parse(b.date)-Date.parse(a.date));}),
+  list:()=>serial(async()=>{const rows=(await remote.pull()).map(fromServer);entries.clear();for(const r of rows)entries.set(r.id,r);return copy(rows.filter(r=>!r.deleted).sort((a,b)=>Date.parse(b.date)-Date.parse(a.date)));}),
   draft:()=>serial(async()=>{if(!draftLoaded)await readDraft();return copy(draftValue(draftRow?.payload));}),
   reloadDraft:()=>serial(async()=>{const row=await readDraft();pendingDraft=null;draftConflict=false;return copy(draftValue(row?.payload));}),
-  storeDraft:r=>serial(()=>storeDraft(copy(r))),
-  save:r=>serial(()=>write(copy(r))),
-  finish:r=>serial(async()=>{if(draftConflict)throw conflict('draft');if(!draftLoaded)await readDraft();return write(copy(r),{finishDraft:true});}),
+  // Capture caller-owned input now, not after earlier requests finish. Nested
+  // reflection/photo/visibility edits must not alter an already queued request.
+  storeDraft:async r=>{const value=copy(r);return serial(()=>storeDraft(value));},
+  save:async r=>{const value=copy(r);return serial(()=>write(value));},
+  finish:async r=>{const value=copy(r);return serial(async()=>{if(draftConflict)throw conflict('draft');if(!draftLoaded)await readDraft();return write(value,{finishDraft:true});});},
   remove:id=>serial(async()=>{const r=entries.get(id);if(!r||r.deleted)throw Error('기록을 다시 열어주세요.');return write({...r,note:'',context:'',wineName:'',vintage:'',conversation:[],photoPath:null,seconds:0,featured:false,deleted:true,visibility:'private'});}),
   publish:(id,visibility)=>serial(async()=>{if(!['private','public'].includes(visibility))throw Error('공개 범위를 확인해주세요.');const r=entries.get(id);if(!r||r.deleted)throw Error('기록을 다시 열어주세요.');return write({...r,visibility});}),
-  sync:async()=>{await api.list();return {conflicts:0,pending:0};},
+  sync:async()=>{await api.list();return {conflicts:0,pending:await api.pending()};},
   pending:async()=>Number(Boolean(pendingDraft))+pendingEntries.size,
   hasPending:()=>Boolean(pendingDraft)||pendingEntries.size>0,
   clear:()=>serial(async()=>{entries.clear();pendingEntries.clear();draftRow=null;draftLoaded=false;pendingDraft=null;draftConflict=false;}),
