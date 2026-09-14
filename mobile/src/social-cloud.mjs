@@ -1,15 +1,16 @@
 import {newId} from './identity.mjs';
 import {photoFiles} from './photos.mjs';
+import {PUBLIC_ENTRY_SELECT,publicRecords} from './public-records.mjs';
 
 export function socialCloud({client,actor,unwrap,account}){
  const count=async query=>{const result=await query;if(result.error)throw result.error;return result.count||0;};
  async function ensure(c,u){await unwrap(c.from('mg_profiles').upsert({id:u.id},{onConflict:'id',ignoreDuplicates:true}));}
  return {
   async feed(offset=0,{following=false,stage=null,owner=null,cursor=null}={}){
-   return unwrap(client.rpc('mg_feed',{p_following:following,p_stage:stage||null,p_owner:owner,p_before_at:cursor?.created_at||null,p_after_id:cursor?.id||null}).select('*,author:mg_profiles(name)').range(offset,offset+19));
+   return unwrap(client.rpc('mg_feed',{p_following:following,p_stage:stage||null,p_owner:owner,p_before_at:cursor?.created_at||null,p_after_id:cursor?.id||null}).select(PUBLIC_ENTRY_SELECT).range(offset,offset+19));
   },
   publicProfile:id=>unwrap(client.from('mg_profiles').select('id,name,bio').eq('id',id).single()),
-  featured:id=>unwrap(client.from('mg_public_entries').select('*,author:mg_profiles(name)').eq('owner_id',id).eq('featured',true).order('created_at',{ascending:false}).limit(4)),
+  featured:publicRecords(client,unwrap).featured,
   async profileCounts(id){
    const [entries,followers,following]=await Promise.all([
     count(client.from('mg_public_entries').select('id',{count:'exact',head:true}).eq('owner_id',id)),

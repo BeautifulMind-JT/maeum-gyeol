@@ -1,5 +1,6 @@
 import {createClient} from './vendor/supabase.mjs';
 import {socialCloud} from './social-cloud.mjs';
+import {publicRecords} from './public-records.mjs';
 export async function loadCloud(storage){
  const response=await fetch('./cloud-config.json',{cache:'no-store'});
  if(!response.ok)throw Error('계정 연결 설정을 불러오지 못했어요.');
@@ -14,6 +15,7 @@ export async function loadCloud(storage){
  const actor=async()=>{const {session}=await unwrap(client.auth.getSession());if(!session)throw Error('로그인해주세요.');const token=session.access_token;
   const c=createClient(config.url,config.publishableKey,{accessToken:async()=>token,auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false},global:{fetch:(url,init)=>fetch(url,{...init,cache:'no-store',signal:init?.signal||AbortSignal.timeout(20000)})}});return {c,u:session.user};};
  const social=socialCloud({client,actor,unwrap,account});
+ const records=publicRecords(client,unwrap);
  return {
   legacyAppUrl:config.legacyAppUrl||'',
   scope:new URL(config.url).hostname.split('.')[0],
@@ -42,9 +44,9 @@ export async function loadCloud(storage){
     async pull(){let all=[],last='';for(;;){const query=new URLSearchParams({select:'*',owner_id:'eq.'+owner,order:'id.asc',limit:'200'});if(last)query.set('id','gt.'+last);const rows=await boundRequest('mg_entries?'+query);all.push(...rows);if(rows.length<200)break;last=rows.at(-1).id;}return all;}
    };
   },
-  async feed(offset=0){return unwrap(client.from('mg_public_entries').select('*,author:mg_profiles(name)').order('created_at',{ascending:false}).order('id').range(offset,offset+19));},
-  async entry(id){return unwrap(client.from('mg_public_entries').select('*,author:mg_profiles(name)').eq('id',id).single());},
-  async comments(id,offset=0){return unwrap(client.from('mg_comments').select('*,author:mg_profiles(name)').eq('entry_id',id).order('created_at').order('id').range(offset,offset+49));},
+  feed:records.feed,
+  entry:records.entry,
+  async comments(id,offset=0){return records.comments(id,offset);},
   async comment(entryId,body,id){const u=await account();await unwrap(client.from('mg_profiles').upsert({id:u.id},{onConflict:'id',ignoreDuplicates:true}));const result=await client.from('mg_comments').insert({id,entry_id:entryId,author_id:u.id,body});if(result.error?.code==='23505'){const existing=await unwrap(client.from('mg_comments').select('id,author_id,entry_id,body').eq('id',id).single());if(existing.author_id===u.id&&existing.entry_id===entryId&&existing.body===body)return;}if(result.error)throw result.error;},
   deleteComment:id=>unwrap(client.from('mg_comments').delete().eq('id',id)),
   async exportComments(){const u=await account();let rows=[],last='';for(;;){let q=client.from('mg_comments').select('id,entry_id,body,created_at').eq('author_id',u.id).order('id').limit(200);if(last)q=q.gt('id',last);const batch=await unwrap(q);rows.push(...batch);if(batch.length<200)return rows;last=batch.at(-1).id;}},

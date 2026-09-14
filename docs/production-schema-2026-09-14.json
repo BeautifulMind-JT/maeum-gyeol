@@ -1,0 +1,2058 @@
+[
+  {
+    "kind": "bucket",
+    "name": "maeum-photos",
+    "value": {
+      "public": false,
+      "file_size_limit": 1500000,
+      "allowed_mime_types": [
+        "image/jpeg"
+      ]
+    }
+  },
+  {
+    "kind": "column",
+    "name": "maeum_internal.write_windows.action",
+    "value": {
+      "type": "text",
+      "default": null,
+      "nullable": false
+    }
+  },
+  {
+    "kind": "column",
+    "name": "maeum_internal.write_windows.actor_id",
+    "value": {
+      "type": "uuid",
+      "default": null,
+      "nullable": false
+    }
+  },
+  {
+    "kind": "column",
+    "name": "maeum_internal.write_windows.used",
+    "value": {
+      "type": "integer",
+      "default": null,
+      "nullable": false
+    }
+  },
+  {
+    "kind": "column",
+    "name": "maeum_internal.write_windows.window_at",
+    "value": {
+      "type": "timestamp with time zone",
+      "default": null,
+      "nullable": false
+    }
+  },
+  {
+    "kind": "column",
+    "name": "public.mg_blocks.blocked_id",
+    "value": {
+      "type": "uuid",
+      "default": null,
+      "nullable": false
+    }
+  },
+  {
+    "kind": "column",
+    "name": "public.mg_blocks.blocker_id",
+    "value": {
+      "type": "uuid",
+      "default": null,
+      "nullable": false
+    }
+  },
+  {
+    "kind": "column",
+    "name": "public.mg_blocks.created_at",
+    "value": {
+      "type": "timestamp with time zone",
+      "default": "now()",
+      "nullable": false
+    }
+  },
+  {
+    "kind": "column",
+    "name": "public.mg_comments.author_id",
+    "value": {
+      "type": "uuid",
+      "default": null,
+      "nullable": false
+    }
+  },
+  {
+    "kind": "column",
+    "name": "public.mg_comments.body",
+    "value": {
+      "type": "text",
+      "default": null,
+      "nullable": false
+    }
+  },
+  {
+    "kind": "column",
+    "name": "public.mg_comments.created_at",
+    "value": {
+      "type": "timestamp with time zone",
+      "default": "now()",
+      "nullable": false
+    }
+  },
+  {
+    "kind": "column",
+    "name": "public.mg_comments.entry_id",
+    "value": {
+      "type": "uuid",
+      "default": null,
+      "nullable": false
+    }
+  },
+  {
+    "kind": "column",
+    "name": "public.mg_comments.id",
+    "value": {
+      "type": "uuid",
+      "default": null,
+      "nullable": false
+    }
+  },
+  {
+    "kind": "column",
+    "name": "public.mg_drafts.mutation_id",
+    "value": {
+      "type": "uuid",
+      "default": null,
+      "nullable": false
+    }
+  },
+  {
+    "kind": "column",
+    "name": "public.mg_drafts.owner_id",
+    "value": {
+      "type": "uuid",
+      "default": null,
+      "nullable": false
+    }
+  },
+  {
+    "kind": "column",
+    "name": "public.mg_drafts.payload",
+    "value": {
+      "type": "jsonb",
+      "default": null,
+      "nullable": true
+    }
+  },
+  {
+    "kind": "column",
+    "name": "public.mg_drafts.revision",
+    "value": {
+      "type": "bigint",
+      "default": null,
+      "nullable": false
+    }
+  },
+  {
+    "kind": "column",
+    "name": "public.mg_drafts.updated_at",
+    "value": {
+      "type": "timestamp with time zone",
+      "default": "now()",
+      "nullable": false
+    }
+  },
+  {
+    "kind": "column",
+    "name": "public.mg_entries.comments_enabled",
+    "value": {
+      "type": "boolean",
+      "default": "true",
+      "nullable": false
+    }
+  },
+  {
+    "kind": "column",
+    "name": "public.mg_entries.context",
+    "value": {
+      "type": "text",
+      "default": "''::text",
+      "nullable": false
+    }
+  },
+  {
+    "kind": "column",
+    "name": "public.mg_entries.conversation",
+    "value": {
+      "type": "jsonb",
+      "default": "'[]'::jsonb",
+      "nullable": false
+    }
+  },
+  {
+    "kind": "column",
+    "name": "public.mg_entries.created_at",
+    "value": {
+      "type": "timestamp with time zone",
+      "default": "now()",
+      "nullable": false
+    }
+  },
+  {
+    "kind": "column",
+    "name": "public.mg_entries.deleted",
+    "value": {
+      "type": "boolean",
+      "default": "false",
+      "nullable": false
+    }
+  },
+  {
+    "kind": "column",
+    "name": "public.mg_entries.featured",
+    "value": {
+      "type": "boolean",
+      "default": "false",
+      "nullable": false
+    }
+  },
+  {
+    "kind": "column",
+    "name": "public.mg_entries.id",
+    "value": {
+      "type": "uuid",
+      "default": null,
+      "nullable": false
+    }
+  },
+  {
+    "kind": "column",
+    "name": "public.mg_entries.mutation_id",
+    "value": {
+      "type": "uuid",
+      "default": null,
+      "nullable": false
+    }
+  },
+  {
+    "kind": "column",
+    "name": "public.mg_entries.note",
+    "value": {
+      "type": "text",
+      "default": null,
+      "nullable": false
+    }
+  },
+  {
+    "kind": "column",
+    "name": "public.mg_entries.owner_id",
+    "value": {
+      "type": "uuid",
+      "default": null,
+      "nullable": false
+    }
+  },
+  {
+    "kind": "column",
+    "name": "public.mg_entries.photo_path",
+    "value": {
+      "type": "text",
+      "default": null,
+      "nullable": true
+    }
+  },
+  {
+    "kind": "column",
+    "name": "public.mg_entries.revision",
+    "value": {
+      "type": "bigint",
+      "default": "1",
+      "nullable": false
+    }
+  },
+  {
+    "kind": "column",
+    "name": "public.mg_entries.seconds",
+    "value": {
+      "type": "integer",
+      "default": "0",
+      "nullable": false
+    }
+  },
+  {
+    "kind": "column",
+    "name": "public.mg_entries.stage",
+    "value": {
+      "type": "text",
+      "default": "'finish'::text",
+      "nullable": false
+    }
+  },
+  {
+    "kind": "column",
+    "name": "public.mg_entries.updated_at",
+    "value": {
+      "type": "timestamp with time zone",
+      "default": "now()",
+      "nullable": false
+    }
+  },
+  {
+    "kind": "column",
+    "name": "public.mg_entries.vintage",
+    "value": {
+      "type": "text",
+      "default": "''::text",
+      "nullable": false
+    }
+  },
+  {
+    "kind": "column",
+    "name": "public.mg_entries.visibility",
+    "value": {
+      "type": "text",
+      "default": "'private'::text",
+      "nullable": false
+    }
+  },
+  {
+    "kind": "column",
+    "name": "public.mg_entries.wine_name",
+    "value": {
+      "type": "text",
+      "default": "''::text",
+      "nullable": false
+    }
+  },
+  {
+    "kind": "column",
+    "name": "public.mg_follows.created_at",
+    "value": {
+      "type": "timestamp with time zone",
+      "default": "now()",
+      "nullable": false
+    }
+  },
+  {
+    "kind": "column",
+    "name": "public.mg_follows.follower_id",
+    "value": {
+      "type": "uuid",
+      "default": null,
+      "nullable": false
+    }
+  },
+  {
+    "kind": "column",
+    "name": "public.mg_follows.following_id",
+    "value": {
+      "type": "uuid",
+      "default": null,
+      "nullable": false
+    }
+  },
+  {
+    "kind": "column",
+    "name": "public.mg_likes.created_at",
+    "value": {
+      "type": "timestamp with time zone",
+      "default": "now()",
+      "nullable": false
+    }
+  },
+  {
+    "kind": "column",
+    "name": "public.mg_likes.entry_id",
+    "value": {
+      "type": "uuid",
+      "default": null,
+      "nullable": false
+    }
+  },
+  {
+    "kind": "column",
+    "name": "public.mg_likes.user_id",
+    "value": {
+      "type": "uuid",
+      "default": null,
+      "nullable": false
+    }
+  },
+  {
+    "kind": "column",
+    "name": "public.mg_media_gc.owner_id",
+    "value": {
+      "type": "uuid",
+      "default": null,
+      "nullable": false
+    }
+  },
+  {
+    "kind": "column",
+    "name": "public.mg_media_gc.photo_path",
+    "value": {
+      "type": "text",
+      "default": null,
+      "nullable": false
+    }
+  },
+  {
+    "kind": "column",
+    "name": "public.mg_media_gc.queued_at",
+    "value": {
+      "type": "timestamp with time zone",
+      "default": "now()",
+      "nullable": false
+    }
+  },
+  {
+    "kind": "column",
+    "name": "public.mg_notifications.actor_id",
+    "value": {
+      "type": "uuid",
+      "default": null,
+      "nullable": false
+    }
+  },
+  {
+    "kind": "column",
+    "name": "public.mg_notifications.created_at",
+    "value": {
+      "type": "timestamp with time zone",
+      "default": "now()",
+      "nullable": false
+    }
+  },
+  {
+    "kind": "column",
+    "name": "public.mg_notifications.entry_id",
+    "value": {
+      "type": "uuid",
+      "default": null,
+      "nullable": true
+    }
+  },
+  {
+    "kind": "column",
+    "name": "public.mg_notifications.id",
+    "value": {
+      "type": "uuid",
+      "default": "gen_random_uuid()",
+      "nullable": false
+    }
+  },
+  {
+    "kind": "column",
+    "name": "public.mg_notifications.kind",
+    "value": {
+      "type": "text",
+      "default": null,
+      "nullable": false
+    }
+  },
+  {
+    "kind": "column",
+    "name": "public.mg_notifications.recipient_id",
+    "value": {
+      "type": "uuid",
+      "default": null,
+      "nullable": false
+    }
+  },
+  {
+    "kind": "column",
+    "name": "public.mg_profiles.bio",
+    "value": {
+      "type": "text",
+      "default": "''::text",
+      "nullable": false
+    }
+  },
+  {
+    "kind": "column",
+    "name": "public.mg_profiles.created_at",
+    "value": {
+      "type": "timestamp with time zone",
+      "default": "now()",
+      "nullable": false
+    }
+  },
+  {
+    "kind": "column",
+    "name": "public.mg_profiles.id",
+    "value": {
+      "type": "uuid",
+      "default": null,
+      "nullable": false
+    }
+  },
+  {
+    "kind": "column",
+    "name": "public.mg_profiles.name",
+    "value": {
+      "type": "text",
+      "default": "'머무는 사람'::text",
+      "nullable": false
+    }
+  },
+  {
+    "kind": "column",
+    "name": "public.mg_public_entries.comments_enabled",
+    "value": {
+      "type": "boolean",
+      "default": "true",
+      "nullable": false
+    }
+  },
+  {
+    "kind": "column",
+    "name": "public.mg_public_entries.context",
+    "value": {
+      "type": "text",
+      "default": null,
+      "nullable": false
+    }
+  },
+  {
+    "kind": "column",
+    "name": "public.mg_public_entries.created_at",
+    "value": {
+      "type": "timestamp with time zone",
+      "default": null,
+      "nullable": false
+    }
+  },
+  {
+    "kind": "column",
+    "name": "public.mg_public_entries.featured",
+    "value": {
+      "type": "boolean",
+      "default": "false",
+      "nullable": false
+    }
+  },
+  {
+    "kind": "column",
+    "name": "public.mg_public_entries.id",
+    "value": {
+      "type": "uuid",
+      "default": null,
+      "nullable": false
+    }
+  },
+  {
+    "kind": "column",
+    "name": "public.mg_public_entries.note",
+    "value": {
+      "type": "text",
+      "default": null,
+      "nullable": false
+    }
+  },
+  {
+    "kind": "column",
+    "name": "public.mg_public_entries.owner_id",
+    "value": {
+      "type": "uuid",
+      "default": null,
+      "nullable": false
+    }
+  },
+  {
+    "kind": "column",
+    "name": "public.mg_public_entries.photo_path",
+    "value": {
+      "type": "text",
+      "default": null,
+      "nullable": true
+    }
+  },
+  {
+    "kind": "column",
+    "name": "public.mg_public_entries.seconds",
+    "value": {
+      "type": "integer",
+      "default": "0",
+      "nullable": false
+    }
+  },
+  {
+    "kind": "column",
+    "name": "public.mg_public_entries.stage",
+    "value": {
+      "type": "text",
+      "default": null,
+      "nullable": false
+    }
+  },
+  {
+    "kind": "column",
+    "name": "public.mg_public_entries.updated_at",
+    "value": {
+      "type": "timestamp with time zone",
+      "default": null,
+      "nullable": false
+    }
+  },
+  {
+    "kind": "column",
+    "name": "public.mg_public_entries.vintage",
+    "value": {
+      "type": "text",
+      "default": null,
+      "nullable": false
+    }
+  },
+  {
+    "kind": "column",
+    "name": "public.mg_public_entries.wine_name",
+    "value": {
+      "type": "text",
+      "default": null,
+      "nullable": false
+    }
+  },
+  {
+    "kind": "column",
+    "name": "public.mg_reports.created_at",
+    "value": {
+      "type": "timestamp with time zone",
+      "default": "now()",
+      "nullable": false
+    }
+  },
+  {
+    "kind": "column",
+    "name": "public.mg_reports.entry_id",
+    "value": {
+      "type": "uuid",
+      "default": null,
+      "nullable": false
+    }
+  },
+  {
+    "kind": "column",
+    "name": "public.mg_reports.id",
+    "value": {
+      "type": "uuid",
+      "default": "gen_random_uuid()",
+      "nullable": false
+    }
+  },
+  {
+    "kind": "column",
+    "name": "public.mg_reports.reason",
+    "value": {
+      "type": "text",
+      "default": null,
+      "nullable": false
+    }
+  },
+  {
+    "kind": "column",
+    "name": "public.mg_reports.reporter_id",
+    "value": {
+      "type": "uuid",
+      "default": null,
+      "nullable": false
+    }
+  },
+  {
+    "kind": "constraint",
+    "name": "maeum_internal.write_windows.write_windows_actor_id_fkey",
+    "value": "FOREIGN KEY (actor_id) REFERENCES auth.users(id) ON DELETE CASCADE"
+  },
+  {
+    "kind": "constraint",
+    "name": "maeum_internal.write_windows.write_windows_pkey",
+    "value": "PRIMARY KEY (actor_id, action, window_at)"
+  },
+  {
+    "kind": "constraint",
+    "name": "public.mg_blocks.mg_blocks_blocked_id_fkey",
+    "value": "FOREIGN KEY (blocked_id) REFERENCES mg_profiles(id) ON DELETE CASCADE"
+  },
+  {
+    "kind": "constraint",
+    "name": "public.mg_blocks.mg_blocks_blocker_id_fkey",
+    "value": "FOREIGN KEY (blocker_id) REFERENCES mg_profiles(id) ON DELETE CASCADE"
+  },
+  {
+    "kind": "constraint",
+    "name": "public.mg_blocks.mg_blocks_check",
+    "value": "CHECK (blocker_id <> blocked_id)"
+  },
+  {
+    "kind": "constraint",
+    "name": "public.mg_blocks.mg_blocks_pkey",
+    "value": "PRIMARY KEY (blocker_id, blocked_id)"
+  },
+  {
+    "kind": "constraint",
+    "name": "public.mg_comments.mg_comments_author_id_fkey",
+    "value": "FOREIGN KEY (author_id) REFERENCES mg_profiles(id) ON DELETE CASCADE"
+  },
+  {
+    "kind": "constraint",
+    "name": "public.mg_comments.mg_comments_body_check",
+    "value": "CHECK (char_length(btrim(body)) >= 1 AND char_length(btrim(body)) <= 1000)"
+  },
+  {
+    "kind": "constraint",
+    "name": "public.mg_comments.mg_comments_entry_id_fkey",
+    "value": "FOREIGN KEY (entry_id) REFERENCES mg_public_entries(id) ON DELETE CASCADE"
+  },
+  {
+    "kind": "constraint",
+    "name": "public.mg_comments.mg_comments_pkey",
+    "value": "PRIMARY KEY (id)"
+  },
+  {
+    "kind": "constraint",
+    "name": "public.mg_drafts.mg_drafts_owner_id_fkey",
+    "value": "FOREIGN KEY (owner_id) REFERENCES mg_profiles(id) ON DELETE CASCADE"
+  },
+  {
+    "kind": "constraint",
+    "name": "public.mg_drafts.mg_drafts_payload_check",
+    "value": "CHECK (payload IS NULL OR jsonb_typeof(payload) = 'object'::text AND octet_length(payload::text) <= 64000)"
+  },
+  {
+    "kind": "constraint",
+    "name": "public.mg_drafts.mg_drafts_pkey",
+    "value": "PRIMARY KEY (owner_id)"
+  },
+  {
+    "kind": "constraint",
+    "name": "public.mg_drafts.mg_drafts_revision_check",
+    "value": "CHECK (revision > 0)"
+  },
+  {
+    "kind": "constraint",
+    "name": "public.mg_entries.mg_entries_check",
+    "value": "CHECK (deleted OR char_length(btrim(note)) > 0)"
+  },
+  {
+    "kind": "constraint",
+    "name": "public.mg_entries.mg_entries_context_check",
+    "value": "CHECK (char_length(context) <= 160)"
+  },
+  {
+    "kind": "constraint",
+    "name": "public.mg_entries.mg_entries_conversation_check",
+    "value": "CHECK (jsonb_typeof(conversation) = 'array'::text AND jsonb_array_length(conversation) <= 8 AND octet_length(conversation::text) <= 56000)"
+  },
+  {
+    "kind": "constraint",
+    "name": "public.mg_entries.mg_entries_note_check",
+    "value": "CHECK (char_length(note) <= 1600)"
+  },
+  {
+    "kind": "constraint",
+    "name": "public.mg_entries.mg_entries_owner_id_fkey",
+    "value": "FOREIGN KEY (owner_id) REFERENCES mg_profiles(id) ON DELETE CASCADE"
+  },
+  {
+    "kind": "constraint",
+    "name": "public.mg_entries.mg_entries_pkey",
+    "value": "PRIMARY KEY (id)"
+  },
+  {
+    "kind": "constraint",
+    "name": "public.mg_entries.mg_entries_revision_check",
+    "value": "CHECK (revision > 0)"
+  },
+  {
+    "kind": "constraint",
+    "name": "public.mg_entries.mg_entries_seconds_check",
+    "value": "CHECK (seconds >= 0 AND seconds <= 86400)"
+  },
+  {
+    "kind": "constraint",
+    "name": "public.mg_entries.mg_entries_stage_check",
+    "value": "CHECK (stage = ANY (ARRAY['color'::text, 'aroma'::text, 'texture'::text, 'finish'::text]))"
+  },
+  {
+    "kind": "constraint",
+    "name": "public.mg_entries.mg_entries_vintage_check",
+    "value": "CHECK (vintage = ''::text OR vintage ~ '^(\\d{4}|NV)$'::text)"
+  },
+  {
+    "kind": "constraint",
+    "name": "public.mg_entries.mg_entries_visibility_check",
+    "value": "CHECK (visibility = ANY (ARRAY['private'::text, 'public'::text]))"
+  },
+  {
+    "kind": "constraint",
+    "name": "public.mg_entries.mg_entries_wine_name_check",
+    "value": "CHECK (char_length(wine_name) <= 160)"
+  },
+  {
+    "kind": "constraint",
+    "name": "public.mg_entries.mg_entry_photo_owner",
+    "value": "CHECK (photo_path IS NULL OR photo_path ~ '^[0-9a-f-]{36}/[0-9a-f-]{36}$'::text AND split_part(photo_path, '/'::text, 1) = owner_id::text)"
+  },
+  {
+    "kind": "constraint",
+    "name": "public.mg_follows.mg_follows_check",
+    "value": "CHECK (follower_id <> following_id)"
+  },
+  {
+    "kind": "constraint",
+    "name": "public.mg_follows.mg_follows_follower_id_fkey",
+    "value": "FOREIGN KEY (follower_id) REFERENCES mg_profiles(id) ON DELETE CASCADE"
+  },
+  {
+    "kind": "constraint",
+    "name": "public.mg_follows.mg_follows_following_id_fkey",
+    "value": "FOREIGN KEY (following_id) REFERENCES mg_profiles(id) ON DELETE CASCADE"
+  },
+  {
+    "kind": "constraint",
+    "name": "public.mg_follows.mg_follows_pkey",
+    "value": "PRIMARY KEY (follower_id, following_id)"
+  },
+  {
+    "kind": "constraint",
+    "name": "public.mg_likes.mg_likes_entry_id_fkey",
+    "value": "FOREIGN KEY (entry_id) REFERENCES mg_public_entries(id) ON DELETE CASCADE"
+  },
+  {
+    "kind": "constraint",
+    "name": "public.mg_likes.mg_likes_pkey",
+    "value": "PRIMARY KEY (user_id, entry_id)"
+  },
+  {
+    "kind": "constraint",
+    "name": "public.mg_likes.mg_likes_user_id_fkey",
+    "value": "FOREIGN KEY (user_id) REFERENCES mg_profiles(id) ON DELETE CASCADE"
+  },
+  {
+    "kind": "constraint",
+    "name": "public.mg_media_gc.mg_media_gc_owner_id_fkey",
+    "value": "FOREIGN KEY (owner_id) REFERENCES mg_profiles(id) ON DELETE CASCADE"
+  },
+  {
+    "kind": "constraint",
+    "name": "public.mg_media_gc.mg_media_gc_pkey",
+    "value": "PRIMARY KEY (photo_path)"
+  },
+  {
+    "kind": "constraint",
+    "name": "public.mg_notifications.mg_notifications_actor_id_fkey",
+    "value": "FOREIGN KEY (actor_id) REFERENCES mg_profiles(id) ON DELETE CASCADE"
+  },
+  {
+    "kind": "constraint",
+    "name": "public.mg_notifications.mg_notifications_entry_id_fkey",
+    "value": "FOREIGN KEY (entry_id) REFERENCES mg_public_entries(id) ON DELETE CASCADE"
+  },
+  {
+    "kind": "constraint",
+    "name": "public.mg_notifications.mg_notifications_kind_check",
+    "value": "CHECK (kind = ANY (ARRAY['comment'::text, 'like'::text, 'follow'::text]))"
+  },
+  {
+    "kind": "constraint",
+    "name": "public.mg_notifications.mg_notifications_pkey",
+    "value": "PRIMARY KEY (id)"
+  },
+  {
+    "kind": "constraint",
+    "name": "public.mg_notifications.mg_notifications_recipient_id_fkey",
+    "value": "FOREIGN KEY (recipient_id) REFERENCES mg_profiles(id) ON DELETE CASCADE"
+  },
+  {
+    "kind": "constraint",
+    "name": "public.mg_profiles.mg_profiles_bio_check",
+    "value": "CHECK (char_length(bio) <= 240)"
+  },
+  {
+    "kind": "constraint",
+    "name": "public.mg_profiles.mg_profiles_id_fkey",
+    "value": "FOREIGN KEY (id) REFERENCES auth.users(id) ON DELETE CASCADE"
+  },
+  {
+    "kind": "constraint",
+    "name": "public.mg_profiles.mg_profiles_name_check",
+    "value": "CHECK (char_length(name) >= 1 AND char_length(name) <= 32)"
+  },
+  {
+    "kind": "constraint",
+    "name": "public.mg_profiles.mg_profiles_pkey",
+    "value": "PRIMARY KEY (id)"
+  },
+  {
+    "kind": "constraint",
+    "name": "public.mg_public_entries.mg_public_entries_id_fkey",
+    "value": "FOREIGN KEY (id) REFERENCES mg_entries(id) ON DELETE CASCADE"
+  },
+  {
+    "kind": "constraint",
+    "name": "public.mg_public_entries.mg_public_entries_owner_id_fkey",
+    "value": "FOREIGN KEY (owner_id) REFERENCES mg_profiles(id) ON DELETE CASCADE"
+  },
+  {
+    "kind": "constraint",
+    "name": "public.mg_public_entries.mg_public_entries_pkey",
+    "value": "PRIMARY KEY (id)"
+  },
+  {
+    "kind": "constraint",
+    "name": "public.mg_reports.mg_reports_entry_id_fkey",
+    "value": "FOREIGN KEY (entry_id) REFERENCES mg_public_entries(id) ON DELETE CASCADE"
+  },
+  {
+    "kind": "constraint",
+    "name": "public.mg_reports.mg_reports_pkey",
+    "value": "PRIMARY KEY (id)"
+  },
+  {
+    "kind": "constraint",
+    "name": "public.mg_reports.mg_reports_reason_check",
+    "value": "CHECK (reason = ANY (ARRAY['spam'::text, 'harassment'::text, 'privacy'::text, 'other'::text]))"
+  },
+  {
+    "kind": "constraint",
+    "name": "public.mg_reports.mg_reports_reporter_id_entry_id_key",
+    "value": "UNIQUE (reporter_id, entry_id)"
+  },
+  {
+    "kind": "constraint",
+    "name": "public.mg_reports.mg_reports_reporter_id_fkey",
+    "value": "FOREIGN KEY (reporter_id) REFERENCES mg_profiles(id) ON DELETE CASCADE"
+  },
+  {
+    "kind": "function",
+    "name": "maeum_internal.commit_draft(p_base_revision bigint, p_mutation_id uuid, p_payload jsonb)",
+    "value": {
+      "body": "\ndeclare who uuid:=auth.uid();current_row public.mg_drafts;next_payload jsonb;photo text;field text;item jsonb;\nbegin\n if who is null or not exists(select 1 from auth.users where id=who) then raise exception 'Sign in required' using errcode='42501';end if;\n if p_base_revision is null or p_base_revision<0 or p_mutation_id is null then raise exception 'Invalid mutation';end if;\n perform pg_advisory_xact_lock(hashtextextended(who::text,0));\n insert into public.mg_profiles(id) values(who) on conflict do nothing;\n select * into current_row from public.mg_drafts where owner_id=who for update;\n if found and current_row.mutation_id=p_mutation_id then return jsonb_build_object('status','applied','draft',to_jsonb(current_row));end if;\n if coalesce(current_row.revision,0)<>p_base_revision then return jsonb_build_object('status','conflict','draft',to_jsonb(current_row));end if;\n if p_payload is not null then\n  if jsonb_typeof(p_payload)<>'object' or octet_length(p_payload::text)>64000\n   or coalesce(p_payload->>'id','')!~'^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'\n   or nullif(p_payload->>'date','') is null then raise exception 'Invalid draft';end if;\n  perform (p_payload->>'date')::timestamptz;\n  foreach field in array array['note','context','wineName','vintage'] loop\n   if p_payload ? field and jsonb_typeof(p_payload->field)<>'string' then raise exception 'Invalid draft text';end if;\n  end loop;\n  if char_length(coalesce(p_payload->>'note',''))>1600 or char_length(coalesce(p_payload->>'context',''))>160\n   or char_length(coalesce(p_payload->>'wineName',''))>160 or char_length(coalesce(p_payload->>'vintage',''))>4 then raise exception 'Draft text too long';end if;\n  if coalesce(p_payload->>'stage','finish') not in ('color','aroma','texture','finish') then raise exception 'Invalid stage';end if;\n  if coalesce((p_payload->>'seconds')::integer,0) not between 0 and 86400 then raise exception 'Invalid duration';end if;\n  if jsonb_typeof(coalesce(p_payload->'conversation','[]'))<>'array' or jsonb_array_length(coalesce(p_payload->'conversation','[]'))>8 then raise exception 'Invalid reflection';end if;\n  for item in select value from jsonb_array_elements(coalesce(p_payload->'conversation','[]')) loop\n   if jsonb_typeof(item)<>'object' or coalesce(item->>'role','') not in ('you','guide')\n    or coalesce(jsonb_typeof(item->'text'),'null')<>'string' or char_length(item->>'text')>1600 then raise exception 'Invalid reflection';end if;\n  end loop;\n  photo:=nullif(p_payload->>'photoPath','');\n  if photo is not null then\n   if split_part(photo,'/',1)<>who::text or photo!~'^[0-9a-f-]{36}/[0-9a-f-]{36}$' then raise exception 'Photo owner required' using errcode='42501';end if;\n   if not exists(select 1 from storage.objects where bucket_id='maeum-photos' and name=photo||'-full.jpg')\n    or not exists(select 1 from storage.objects where bucket_id='maeum-photos' and name=photo||'-thumb.jpg') then raise exception '사진 업로드를 마친 뒤 저장해주세요.';end if;\n  end if;\n  next_payload:=jsonb_build_object('id',p_payload->>'id','date',p_payload->>'date',\n   'note',coalesce(p_payload->>'note',''),'context',coalesce(p_payload->>'context',''),'wineName',coalesce(p_payload->>'wineName',''),\n   'vintage',coalesce(p_payload->>'vintage',''),'stage',coalesce(p_payload->>'stage','finish'),'seconds',coalesce((p_payload->>'seconds')::int,0),\n   'conversation',coalesce(p_payload->'conversation','[]'),'photoPath',photo,'commentsEnabled',coalesce((p_payload->>'commentsEnabled')::boolean,true),\n   'featured',coalesce((p_payload->>'featured')::boolean,false),'entryRevision',greatest(coalesce((p_payload->>'entryRevision')::bigint,0),0),\n   'visibility',case when p_payload->>'visibility'='public' then 'public' else 'private' end);\n end if;\n if current_row.payload->>'photoPath' is not null and current_row.payload->>'photoPath' is distinct from next_payload->>'photoPath' then\n  insert into public.mg_media_gc(photo_path,owner_id) values(current_row.payload->>'photoPath',who) on conflict do nothing;\n end if;\n insert into public.mg_drafts(owner_id,revision,mutation_id,payload) values(who,1,p_mutation_id,next_payload)\n on conflict(owner_id) do update set revision=mg_drafts.revision+1,mutation_id=excluded.mutation_id,payload=excluded.payload,updated_at=clock_timestamp()\n returning * into current_row;\n return jsonb_build_object('status','applied','draft',to_jsonb(current_row));\nend ",
+      "config": [
+        "search_path=\"\""
+      ],
+      "result": "jsonb",
+      "strict": false,
+      "definer": true,
+      "language": "plpgsql",
+      "volatility": "v"
+    }
+  },
+  {
+    "kind": "function",
+    "name": "maeum_internal.delete_account()",
+    "value": {
+      "body": "\ndeclare who uuid:=auth.uid();\nbegin\n if who is null then raise exception 'Sign in required' using errcode='42501';end if;\n if exists(select 1 from storage.objects where bucket_id='maeum-photos' and split_part(name,'/',1)=who::text) then raise exception '사진 정리를 마친 뒤 계정을 삭제해주세요.';end if;\n delete from auth.users where id=who;\nend ",
+      "config": [
+        "search_path=\"\""
+      ],
+      "result": "void",
+      "strict": false,
+      "definer": true,
+      "language": "plpgsql",
+      "volatility": "v"
+    }
+  },
+  {
+    "kind": "function",
+    "name": "maeum_internal.is_blocked(other uuid)",
+    "value": {
+      "body": "\n select exists(select 1 from public.mg_blocks where\n (blocker_id=auth.uid() and blocked_id=other) or (blocked_id=auth.uid() and blocker_id=other));\n",
+      "config": [
+        "search_path=\"\""
+      ],
+      "result": "boolean",
+      "strict": false,
+      "definer": true,
+      "language": "sql",
+      "volatility": "s"
+    }
+  },
+  {
+    "kind": "function",
+    "name": "maeum_internal.mg_commit_entry(p_id uuid, p_base_revision bigint, p_mutation_id uuid, p_payload jsonb)",
+    "value": {
+      "body": "\ndeclare current_row public.mg_entries; result_row public.mg_entries; who uuid:=auth.uid();\nbegin\n if who is null then raise exception 'Sign in required' using errcode='42501'; end if;\n if p_base_revision is null or p_base_revision<0 or p_mutation_id is null or p_payload is null or jsonb_typeof(p_payload)<>'object' then raise exception 'Invalid mutation'; end if;\n perform pg_advisory_xact_lock(hashtextextended(who::text, 0));\n insert into public.mg_profiles(id) values(who) on conflict(id) do nothing;\n select * into current_row from public.mg_entries where id=p_id and owner_id=who for update;\n if found then\n  if current_row.mutation_id=p_mutation_id then return jsonb_build_object('status','applied','entry',to_jsonb(current_row)); end if;\n  if current_row.revision<>p_base_revision or current_row.deleted then return jsonb_build_object('status','conflict','entry',to_jsonb(current_row)); end if;\n  update public.mg_entries set note=p_payload->>'note',context=coalesce(p_payload->>'context',''),wine_name=coalesce(p_payload->>'wineName',''),vintage=coalesce(p_payload->>'vintage',''),stage=coalesce(p_payload->>'stage','finish'),seconds=coalesce((p_payload->>'seconds')::int,0),conversation=coalesce(p_payload->'conversation','[]'),visibility=coalesce(p_payload->>'visibility','private'),deleted=coalesce((p_payload->>'deleted')::boolean,false),mutation_id=p_mutation_id,photo_path=case when p_payload ? 'photoPath' then nullif(p_payload->>'photoPath','') else current_row.photo_path end,comments_enabled=coalesce((p_payload->>'commentsEnabled')::boolean,current_row.comments_enabled),featured=coalesce((p_payload->>'featured')::boolean,current_row.featured)\n  where id=p_id and owner_id=who returning * into result_row;\n else\n  if p_base_revision<>0 then return jsonb_build_object('status','missing','entry',null); end if;\n  insert into public.mg_entries(id,owner_id,note,context,wine_name,vintage,stage,seconds,conversation,visibility,deleted,mutation_id,created_at,photo_path,comments_enabled)\n  values(p_id,who,p_payload->>'note',coalesce(p_payload->>'context',''),coalesce(p_payload->>'wineName',''),coalesce(p_payload->>'vintage',''),coalesce(p_payload->>'stage','finish'),coalesce((p_payload->>'seconds')::int,0),coalesce(p_payload->'conversation','[]'),'private',coalesce((p_payload->>'deleted')::boolean,false),p_mutation_id,coalesce((p_payload->>'date')::timestamptz,now()),nullif(p_payload->>'photoPath',''),coalesce((p_payload->>'commentsEnabled')::boolean,true))\n  returning * into result_row;\n end if;\n return jsonb_build_object('status','applied','entry',to_jsonb(result_row));\nend ",
+      "config": [
+        "search_path=\"\""
+      ],
+      "result": "jsonb",
+      "strict": false,
+      "definer": true,
+      "language": "plpgsql",
+      "volatility": "v"
+    }
+  },
+  {
+    "kind": "function",
+    "name": "maeum_internal.prepare_entry()",
+    "value": {
+      "body": "\nbegin\n if tg_op='UPDATE' then\n  if new.id<>old.id or new.owner_id<>old.owner_id then raise exception 'Entry identity is immutable' using errcode='42501'; end if;\n  if old.deleted and not new.deleted then raise exception 'Deleted entries cannot be restored in place' using errcode='23514'; end if;\n  new.created_at:=old.created_at;\n  new.revision:=old.revision+1;\n else new.revision:=1;\n end if;\n new.updated_at:=clock_timestamp();\n if new.deleted then\n  new.note:='';new.context:='';new.wine_name:='';new.vintage:='';new.conversation:='[]';new.seconds:=0;new.visibility:='private';\n end if;\n return new;\nend ",
+      "config": [
+        "search_path=\"\""
+      ],
+      "result": "trigger",
+      "strict": false,
+      "definer": false,
+      "language": "plpgsql",
+      "volatility": "v"
+    }
+  },
+  {
+    "kind": "function",
+    "name": "maeum_internal.prepare_social_entry()",
+    "value": {
+      "body": "\nbegin\n if new.deleted then new.photo_path:=null;new.featured:=false;end if;\n if new.photo_path is not null and (tg_op='INSERT' or new.photo_path is distinct from old.photo_path) then\n  if not exists(select 1 from storage.objects where bucket_id='maeum-photos' and name=new.photo_path||'-full.jpg')\n   or not exists(select 1 from storage.objects where bucket_id='maeum-photos' and name=new.photo_path||'-thumb.jpg') then raise exception '사진 업로드를 마친 뒤 저장해주세요.';end if;\n end if;\n return new;\nend ",
+      "config": [
+        "search_path=\"\""
+      ],
+      "result": "trigger",
+      "strict": false,
+      "definer": false,
+      "language": "plpgsql",
+      "volatility": "v"
+    }
+  },
+  {
+    "kind": "function",
+    "name": "maeum_internal.project_entry()",
+    "value": {
+      "body": "\nbegin\n if auth.uid() is null or auth.uid()<>new.owner_id then raise exception 'Owner required' using errcode='42501';end if;\n if tg_op='UPDATE' and old.photo_path is not null and (new.deleted or new.photo_path is distinct from old.photo_path) then\n  insert into public.mg_media_gc(photo_path,owner_id) values(old.photo_path,old.owner_id) on conflict do nothing;\n end if;\n if new.visibility='public' and not new.deleted then\n  if new.featured and not exists(select 1 from public.mg_public_entries where id=new.id and featured) and (select count(*) from public.mg_public_entries where owner_id=new.owner_id and featured)>=4 then raise exception '대표 기록은 네 개까지 고를 수 있어요.';end if;\n  insert into public.mg_public_entries(id,owner_id,note,context,wine_name,vintage,stage,created_at,updated_at,photo_path,comments_enabled,featured,seconds)\n  values(new.id,new.owner_id,new.note,new.context,new.wine_name,new.vintage,new.stage,new.created_at,new.updated_at,new.photo_path,new.comments_enabled,new.featured,new.seconds)\n  on conflict(id) do update set note=excluded.note,context=excluded.context,wine_name=excluded.wine_name,vintage=excluded.vintage,stage=excluded.stage,updated_at=excluded.updated_at,photo_path=excluded.photo_path,comments_enabled=excluded.comments_enabled,featured=excluded.featured,seconds=excluded.seconds;\n else delete from public.mg_public_entries where id=new.id;end if;\n return new;\nend ",
+      "config": [
+        "search_path=\"\""
+      ],
+      "result": "trigger",
+      "strict": false,
+      "definer": true,
+      "language": "plpgsql",
+      "volatility": "v"
+    }
+  },
+  {
+    "kind": "function",
+    "name": "maeum_internal.save_entry(p_id uuid, p_base_revision bigint, p_mutation_id uuid, p_payload jsonb, p_draft_revision bigint)",
+    "value": {
+      "body": "\ndeclare who uuid:=auth.uid();current_draft public.mg_drafts;current_entry public.mg_entries;result jsonb;\nbegin\n if who is null or not exists(select 1 from auth.users where id=who) then raise exception 'Sign in required' using errcode='42501';end if;\n perform pg_advisory_xact_lock(hashtextextended(who::text,0));\n select * into current_entry from public.mg_entries where owner_id=who and id=p_id;\n select * into current_draft from public.mg_drafts where owner_id=who for update;\n if current_entry.mutation_id=p_mutation_id then return jsonb_build_object('status','applied','entry',to_jsonb(current_entry),'draft',to_jsonb(current_draft));end if;\n if p_draft_revision is not null and (current_draft.revision is distinct from p_draft_revision or current_draft.payload->>'id' is distinct from p_id::text) then\n  return jsonb_build_object('status','draft_conflict','draft',to_jsonb(current_draft));\n end if;\n result:=maeum_internal.mg_commit_entry(p_id,p_base_revision,p_mutation_id,p_payload);\n if result->>'status'='applied' and p_draft_revision is not null then\n  perform maeum_internal.commit_draft(p_draft_revision,gen_random_uuid(),null);\n  select * into current_draft from public.mg_drafts where owner_id=who;\n end if;\n return result||jsonb_build_object('draft',to_jsonb(current_draft));\nend ",
+      "config": [
+        "search_path=\"\""
+      ],
+      "result": "jsonb",
+      "strict": false,
+      "definer": true,
+      "language": "plpgsql",
+      "volatility": "v"
+    }
+  },
+  {
+    "kind": "function",
+    "name": "maeum_internal.social_effects()",
+    "value": {
+      "body": "\ndeclare who uuid:=auth.uid();recipient uuid;post_id uuid;event_kind text;\nbegin\n if who is null then raise exception 'Sign in required' using errcode='42501'; end if;\n if tg_table_name='mg_blocks' then\n  if new.blocker_id<>who then raise exception 'Owner required' using errcode='42501'; end if;\n  delete from public.mg_follows where (follower_id=who and following_id=new.blocked_id) or (following_id=who and follower_id=new.blocked_id);\n  delete from public.mg_notifications where (recipient_id=who and actor_id=new.blocked_id) or (actor_id=who and recipient_id=new.blocked_id);\n  return new;\n elsif tg_table_name='mg_follows' then recipient:=new.following_id;event_kind:='follow';\n elsif tg_table_name='mg_likes' then post_id:=new.entry_id;event_kind:='like';\n else post_id:=new.entry_id;event_kind:='comment';end if;\n if post_id is not null then select owner_id into recipient from public.mg_public_entries where id=post_id;end if;\n if recipient is not null and recipient<>who then\n  -- Toggle/retry floods cannot produce duplicate reaction notifications.\n  if event_kind='comment' or not exists(select 1 from public.mg_notifications where recipient_id=recipient and actor_id=who and kind=event_kind and entry_id is not distinct from post_id) then\n   insert into public.mg_notifications(recipient_id,actor_id,entry_id,kind) values(recipient,who,post_id,event_kind);\n  end if;\n end if;\n return new;\nend ",
+      "config": [
+        "search_path=\"\""
+      ],
+      "result": "trigger",
+      "strict": false,
+      "definer": true,
+      "language": "plpgsql",
+      "volatility": "v"
+    }
+  },
+  {
+    "kind": "function",
+    "name": "maeum_internal.social_write()",
+    "value": {
+      "body": "\ndeclare who uuid:=auth.uid();recipient uuid;post_id uuid;event_kind text;count_used integer;limit_value integer;\nbegin\n if who is null or not exists(select 1 from auth.users where id=who) then raise exception 'Sign in required' using errcode='42501'; end if;\n if tg_table_name='mg_follows' then\n  if new.follower_id<>who then raise exception 'Owner required' using errcode='42501'; end if;\n  recipient:=new.following_id;event_kind:='follow';limit_value:=30;\n elsif tg_table_name='mg_likes' then\n  if new.user_id<>who then raise exception 'Owner required' using errcode='42501'; end if;\n  post_id:=new.entry_id;event_kind:='like';limit_value:=60;\n elsif tg_table_name='mg_comments' then\n  if new.author_id<>who then raise exception 'Owner required' using errcode='42501'; end if;\n  post_id:=new.entry_id;event_kind:='comment';limit_value:=10;\n elsif tg_table_name='mg_reports' then\n  if new.reporter_id<>who then raise exception 'Owner required' using errcode='42501'; end if;\n  post_id:=new.entry_id;limit_value:=5;\n elsif tg_table_name='mg_blocks' then\n  if new.blocker_id<>who then raise exception 'Owner required' using errcode='42501'; end if;\n  limit_value:=20;\n end if;\n delete from maeum_internal.write_windows where actor_id=who and window_at<now()-interval '2 days';\n -- Persist rate counters independently of deletable likes/comments.\n insert into maeum_internal.write_windows(actor_id,action,window_at,used)\n values(who,tg_table_name,date_trunc('minute',clock_timestamp()),1)\n on conflict(actor_id,action,window_at) do update set used=maeum_internal.write_windows.used+1\n returning used into count_used;\n if count_used>limit_value then raise exception '잠시 뒤 다시 시도해주세요.' using errcode='P0001'; end if;\n if post_id is not null then select owner_id into recipient from public.mg_public_entries where id=post_id; end if;\n if recipient is not null and exists(select 1 from public.mg_blocks where (blocker_id=who and blocked_id=recipient) or (blocker_id=recipient and blocked_id=who)) then raise exception '이 계정과는 반응을 나눌 수 없어요.' using errcode='42501'; end if;\n if tg_table_name='mg_comments' and not exists(select 1 from public.mg_public_entries where id=post_id and comments_enabled) then raise exception '댓글을 남길 수 없는 기록이에요.' using errcode='42501'; end if;\n new.created_at:=clock_timestamp();\n return new;\nend ",
+      "config": [
+        "search_path=\"\""
+      ],
+      "result": "trigger",
+      "strict": false,
+      "definer": true,
+      "language": "plpgsql",
+      "volatility": "v"
+    }
+  },
+  {
+    "kind": "function",
+    "name": "public.mg_commit_draft(p_base_revision bigint, p_mutation_id uuid, p_payload jsonb)",
+    "value": {
+      "body": "\n select maeum_internal.commit_draft(p_base_revision,p_mutation_id,p_payload);\n",
+      "config": [
+        "search_path=\"\""
+      ],
+      "result": "jsonb",
+      "strict": false,
+      "definer": false,
+      "language": "sql",
+      "volatility": "v"
+    }
+  },
+  {
+    "kind": "function",
+    "name": "public.mg_commit_entry(p_id uuid, p_base_revision bigint, p_mutation_id uuid, p_payload jsonb)",
+    "value": {
+      "body": "\n select maeum_internal.mg_commit_entry(p_id,p_base_revision,p_mutation_id,p_payload);\n",
+      "config": [
+        "search_path=\"\""
+      ],
+      "result": "jsonb",
+      "strict": false,
+      "definer": false,
+      "language": "sql",
+      "volatility": "v"
+    }
+  },
+  {
+    "kind": "function",
+    "name": "public.mg_delete_account(p_confirm text, p_expected_uid uuid)",
+    "value": {
+      "body": "\nbegin\n if p_confirm<>'DELETE' or p_confirm is null then raise exception 'Confirmation required'; end if;\n if p_expected_uid is null or auth.uid() is distinct from p_expected_uid then raise exception 'Account changed' using errcode='42501'; end if;\n perform maeum_internal.delete_account();\nend ",
+      "config": [
+        "search_path=\"\""
+      ],
+      "result": "void",
+      "strict": false,
+      "definer": false,
+      "language": "plpgsql",
+      "volatility": "v"
+    }
+  },
+  {
+    "kind": "function",
+    "name": "public.mg_feed(p_following boolean, p_stage text, p_owner uuid, p_before_at timestamp with time zone, p_after_id uuid)",
+    "value": {
+      "body": "\n select e.* from public.mg_public_entries e\n where (not p_following or exists(select 1 from public.mg_follows f where f.follower_id=auth.uid() and f.following_id=e.owner_id))\n and (p_stage is null or e.stage=p_stage) and (p_owner is null or e.owner_id=p_owner)\n and (p_before_at is null or e.created_at<p_before_at or (e.created_at=p_before_at and e.id>p_after_id))\n order by e.created_at desc,e.id;\n",
+      "config": [
+        "search_path=\"\""
+      ],
+      "result": "SETOF mg_public_entries",
+      "strict": false,
+      "definer": false,
+      "language": "sql",
+      "volatility": "s"
+    }
+  },
+  {
+    "kind": "function",
+    "name": "public.mg_save_entry(p_id uuid, p_base_revision bigint, p_mutation_id uuid, p_payload jsonb, p_draft_revision bigint)",
+    "value": {
+      "body": "\n select maeum_internal.save_entry(p_id,p_base_revision,p_mutation_id,p_payload,p_draft_revision);\n",
+      "config": [
+        "search_path=\"\""
+      ],
+      "result": "jsonb",
+      "strict": false,
+      "definer": false,
+      "language": "sql",
+      "volatility": "v"
+    }
+  },
+  {
+    "kind": "function-grant",
+    "name": "maeum_internal.commit_draft(p_base_revision bigint, p_mutation_id uuid, p_payload jsonb):authenticated:EXECUTE",
+    "value": false
+  },
+  {
+    "kind": "function-grant",
+    "name": "maeum_internal.delete_account():authenticated:EXECUTE",
+    "value": false
+  },
+  {
+    "kind": "function-grant",
+    "name": "maeum_internal.is_blocked(other uuid):anon:EXECUTE",
+    "value": false
+  },
+  {
+    "kind": "function-grant",
+    "name": "maeum_internal.is_blocked(other uuid):authenticated:EXECUTE",
+    "value": false
+  },
+  {
+    "kind": "function-grant",
+    "name": "maeum_internal.mg_commit_entry(p_id uuid, p_base_revision bigint, p_mutation_id uuid, p_payload jsonb):authenticated:EXECUTE",
+    "value": false
+  },
+  {
+    "kind": "function-grant",
+    "name": "maeum_internal.save_entry(p_id uuid, p_base_revision bigint, p_mutation_id uuid, p_payload jsonb, p_draft_revision bigint):authenticated:EXECUTE",
+    "value": false
+  },
+  {
+    "kind": "function-grant",
+    "name": "public.mg_commit_draft(p_base_revision bigint, p_mutation_id uuid, p_payload jsonb):authenticated:EXECUTE",
+    "value": false
+  },
+  {
+    "kind": "function-grant",
+    "name": "public.mg_commit_entry(p_id uuid, p_base_revision bigint, p_mutation_id uuid, p_payload jsonb):authenticated:EXECUTE",
+    "value": false
+  },
+  {
+    "kind": "function-grant",
+    "name": "public.mg_delete_account(p_confirm text, p_expected_uid uuid):authenticated:EXECUTE",
+    "value": false
+  },
+  {
+    "kind": "function-grant",
+    "name": "public.mg_feed(p_following boolean, p_stage text, p_owner uuid, p_before_at timestamp with time zone, p_after_id uuid):anon:EXECUTE",
+    "value": false
+  },
+  {
+    "kind": "function-grant",
+    "name": "public.mg_feed(p_following boolean, p_stage text, p_owner uuid, p_before_at timestamp with time zone, p_after_id uuid):authenticated:EXECUTE",
+    "value": false
+  },
+  {
+    "kind": "function-grant",
+    "name": "public.mg_save_entry(p_id uuid, p_base_revision bigint, p_mutation_id uuid, p_payload jsonb, p_draft_revision bigint):authenticated:EXECUTE",
+    "value": false
+  },
+  {
+    "kind": "index",
+    "name": "maeum_internal.write_windows_pkey",
+    "value": "CREATE UNIQUE INDEX write_windows_pkey ON maeum_internal.write_windows USING btree (actor_id, action, window_at)"
+  },
+  {
+    "kind": "index",
+    "name": "public.mg_blocks_pkey",
+    "value": "CREATE UNIQUE INDEX mg_blocks_pkey ON public.mg_blocks USING btree (blocker_id, blocked_id)"
+  },
+  {
+    "kind": "index",
+    "name": "public.mg_blocks_target",
+    "value": "CREATE INDEX mg_blocks_target ON public.mg_blocks USING btree (blocked_id, blocker_id)"
+  },
+  {
+    "kind": "index",
+    "name": "public.mg_comments_author",
+    "value": "CREATE INDEX mg_comments_author ON public.mg_comments USING btree (author_id)"
+  },
+  {
+    "kind": "index",
+    "name": "public.mg_comments_entry_created",
+    "value": "CREATE INDEX mg_comments_entry_created ON public.mg_comments USING btree (entry_id, created_at, id)"
+  },
+  {
+    "kind": "index",
+    "name": "public.mg_comments_pkey",
+    "value": "CREATE UNIQUE INDEX mg_comments_pkey ON public.mg_comments USING btree (id)"
+  },
+  {
+    "kind": "index",
+    "name": "public.mg_drafts_pkey",
+    "value": "CREATE UNIQUE INDEX mg_drafts_pkey ON public.mg_drafts USING btree (owner_id)"
+  },
+  {
+    "kind": "index",
+    "name": "public.mg_entries_owner_updated",
+    "value": "CREATE INDEX mg_entries_owner_updated ON public.mg_entries USING btree (owner_id, updated_at, id)"
+  },
+  {
+    "kind": "index",
+    "name": "public.mg_entries_photo",
+    "value": "CREATE INDEX mg_entries_photo ON public.mg_entries USING btree (photo_path) WHERE (photo_path IS NOT NULL)"
+  },
+  {
+    "kind": "index",
+    "name": "public.mg_entries_pkey",
+    "value": "CREATE UNIQUE INDEX mg_entries_pkey ON public.mg_entries USING btree (id)"
+  },
+  {
+    "kind": "index",
+    "name": "public.mg_follows_pkey",
+    "value": "CREATE UNIQUE INDEX mg_follows_pkey ON public.mg_follows USING btree (follower_id, following_id)"
+  },
+  {
+    "kind": "index",
+    "name": "public.mg_follows_target",
+    "value": "CREATE INDEX mg_follows_target ON public.mg_follows USING btree (following_id, follower_id)"
+  },
+  {
+    "kind": "index",
+    "name": "public.mg_likes_entry",
+    "value": "CREATE INDEX mg_likes_entry ON public.mg_likes USING btree (entry_id, user_id)"
+  },
+  {
+    "kind": "index",
+    "name": "public.mg_likes_pkey",
+    "value": "CREATE UNIQUE INDEX mg_likes_pkey ON public.mg_likes USING btree (user_id, entry_id)"
+  },
+  {
+    "kind": "index",
+    "name": "public.mg_media_gc_owner",
+    "value": "CREATE INDEX mg_media_gc_owner ON public.mg_media_gc USING btree (owner_id)"
+  },
+  {
+    "kind": "index",
+    "name": "public.mg_media_gc_pkey",
+    "value": "CREATE UNIQUE INDEX mg_media_gc_pkey ON public.mg_media_gc USING btree (photo_path)"
+  },
+  {
+    "kind": "index",
+    "name": "public.mg_notifications_actor",
+    "value": "CREATE INDEX mg_notifications_actor ON public.mg_notifications USING btree (actor_id)"
+  },
+  {
+    "kind": "index",
+    "name": "public.mg_notifications_entry",
+    "value": "CREATE INDEX mg_notifications_entry ON public.mg_notifications USING btree (entry_id)"
+  },
+  {
+    "kind": "index",
+    "name": "public.mg_notifications_pkey",
+    "value": "CREATE UNIQUE INDEX mg_notifications_pkey ON public.mg_notifications USING btree (id)"
+  },
+  {
+    "kind": "index",
+    "name": "public.mg_notifications_recipient",
+    "value": "CREATE INDEX mg_notifications_recipient ON public.mg_notifications USING btree (recipient_id, created_at DESC, id)"
+  },
+  {
+    "kind": "index",
+    "name": "public.mg_profiles_pkey",
+    "value": "CREATE UNIQUE INDEX mg_profiles_pkey ON public.mg_profiles USING btree (id)"
+  },
+  {
+    "kind": "index",
+    "name": "public.mg_public_entries_created",
+    "value": "CREATE INDEX mg_public_entries_created ON public.mg_public_entries USING btree (created_at DESC, id)"
+  },
+  {
+    "kind": "index",
+    "name": "public.mg_public_entries_owner",
+    "value": "CREATE INDEX mg_public_entries_owner ON public.mg_public_entries USING btree (owner_id)"
+  },
+  {
+    "kind": "index",
+    "name": "public.mg_public_entries_pkey",
+    "value": "CREATE UNIQUE INDEX mg_public_entries_pkey ON public.mg_public_entries USING btree (id)"
+  },
+  {
+    "kind": "index",
+    "name": "public.mg_public_photo",
+    "value": "CREATE INDEX mg_public_photo ON public.mg_public_entries USING btree (photo_path) WHERE (photo_path IS NOT NULL)"
+  },
+  {
+    "kind": "index",
+    "name": "public.mg_public_stage",
+    "value": "CREATE INDEX mg_public_stage ON public.mg_public_entries USING btree (stage, created_at DESC, id)"
+  },
+  {
+    "kind": "index",
+    "name": "public.mg_reports_entry",
+    "value": "CREATE INDEX mg_reports_entry ON public.mg_reports USING btree (entry_id)"
+  },
+  {
+    "kind": "index",
+    "name": "public.mg_reports_pkey",
+    "value": "CREATE UNIQUE INDEX mg_reports_pkey ON public.mg_reports USING btree (id)"
+  },
+  {
+    "kind": "index",
+    "name": "public.mg_reports_reporter_id_entry_id_key",
+    "value": "CREATE UNIQUE INDEX mg_reports_reporter_id_entry_id_key ON public.mg_reports USING btree (reporter_id, entry_id)"
+  },
+  {
+    "kind": "policy",
+    "name": "public.mg_blocks.blocks_delete",
+    "value": {
+      "cmd": "DELETE",
+      "qual": "(blocker_id = ( SELECT auth.uid() AS uid))",
+      "check": null,
+      "roles": [
+        "authenticated"
+      ],
+      "permissive": "PERMISSIVE"
+    }
+  },
+  {
+    "kind": "policy",
+    "name": "public.mg_blocks.blocks_insert",
+    "value": {
+      "cmd": "INSERT",
+      "qual": null,
+      "check": "(blocker_id = ( SELECT auth.uid() AS uid))",
+      "roles": [
+        "authenticated"
+      ],
+      "permissive": "PERMISSIVE"
+    }
+  },
+  {
+    "kind": "policy",
+    "name": "public.mg_blocks.blocks_read",
+    "value": {
+      "cmd": "SELECT",
+      "qual": "(blocker_id = ( SELECT auth.uid() AS uid))",
+      "check": null,
+      "roles": [
+        "authenticated"
+      ],
+      "permissive": "PERMISSIVE"
+    }
+  },
+  {
+    "kind": "policy",
+    "name": "public.mg_comments.comments_delete",
+    "value": {
+      "cmd": "DELETE",
+      "qual": "((author_id = ( SELECT auth.uid() AS uid)) OR (EXISTS ( SELECT 1\n   FROM mg_public_entries e\n  WHERE ((e.id = mg_comments.entry_id) AND (e.owner_id = ( SELECT auth.uid() AS uid))))))",
+      "check": null,
+      "roles": [
+        "authenticated"
+      ],
+      "permissive": "PERMISSIVE"
+    }
+  },
+  {
+    "kind": "policy",
+    "name": "public.mg_comments.comments_insert",
+    "value": {
+      "cmd": "INSERT",
+      "qual": null,
+      "check": "((author_id = ( SELECT auth.uid() AS uid)) AND (EXISTS ( SELECT 1\n   FROM mg_public_entries e\n  WHERE ((e.id = mg_comments.entry_id) AND e.comments_enabled))))",
+      "roles": [
+        "authenticated"
+      ],
+      "permissive": "PERMISSIVE"
+    }
+  },
+  {
+    "kind": "policy",
+    "name": "public.mg_comments.comments_read",
+    "value": {
+      "cmd": "SELECT",
+      "qual": "((NOT maeum_internal.is_blocked(author_id)) AND (EXISTS ( SELECT 1\n   FROM mg_public_entries e\n  WHERE (e.id = mg_comments.entry_id))))",
+      "check": null,
+      "roles": [
+        "anon",
+        "authenticated"
+      ],
+      "permissive": "PERMISSIVE"
+    }
+  },
+  {
+    "kind": "policy",
+    "name": "public.mg_drafts.drafts_owner_read",
+    "value": {
+      "cmd": "SELECT",
+      "qual": "(owner_id = ( SELECT auth.uid() AS uid))",
+      "check": null,
+      "roles": [
+        "authenticated"
+      ],
+      "permissive": "PERMISSIVE"
+    }
+  },
+  {
+    "kind": "policy",
+    "name": "public.mg_entries.entries_insert",
+    "value": {
+      "cmd": "INSERT",
+      "qual": null,
+      "check": "(owner_id = ( SELECT auth.uid() AS uid))",
+      "roles": [
+        "authenticated"
+      ],
+      "permissive": "PERMISSIVE"
+    }
+  },
+  {
+    "kind": "policy",
+    "name": "public.mg_entries.entries_read",
+    "value": {
+      "cmd": "SELECT",
+      "qual": "(owner_id = ( SELECT auth.uid() AS uid))",
+      "check": null,
+      "roles": [
+        "authenticated"
+      ],
+      "permissive": "PERMISSIVE"
+    }
+  },
+  {
+    "kind": "policy",
+    "name": "public.mg_entries.entries_update",
+    "value": {
+      "cmd": "UPDATE",
+      "qual": "(owner_id = ( SELECT auth.uid() AS uid))",
+      "check": "(owner_id = ( SELECT auth.uid() AS uid))",
+      "roles": [
+        "authenticated"
+      ],
+      "permissive": "PERMISSIVE"
+    }
+  },
+  {
+    "kind": "policy",
+    "name": "public.mg_follows.follows_delete",
+    "value": {
+      "cmd": "DELETE",
+      "qual": "(follower_id = ( SELECT auth.uid() AS uid))",
+      "check": null,
+      "roles": [
+        "authenticated"
+      ],
+      "permissive": "PERMISSIVE"
+    }
+  },
+  {
+    "kind": "policy",
+    "name": "public.mg_follows.follows_insert",
+    "value": {
+      "cmd": "INSERT",
+      "qual": null,
+      "check": "((follower_id = ( SELECT auth.uid() AS uid)) AND (NOT maeum_internal.is_blocked(following_id)))",
+      "roles": [
+        "authenticated"
+      ],
+      "permissive": "PERMISSIVE"
+    }
+  },
+  {
+    "kind": "policy",
+    "name": "public.mg_follows.follows_read",
+    "value": {
+      "cmd": "SELECT",
+      "qual": "((NOT maeum_internal.is_blocked(follower_id)) AND (NOT maeum_internal.is_blocked(following_id)))",
+      "check": null,
+      "roles": [
+        "anon",
+        "authenticated"
+      ],
+      "permissive": "PERMISSIVE"
+    }
+  },
+  {
+    "kind": "policy",
+    "name": "public.mg_likes.likes_delete",
+    "value": {
+      "cmd": "DELETE",
+      "qual": "(user_id = ( SELECT auth.uid() AS uid))",
+      "check": null,
+      "roles": [
+        "authenticated"
+      ],
+      "permissive": "PERMISSIVE"
+    }
+  },
+  {
+    "kind": "policy",
+    "name": "public.mg_likes.likes_insert",
+    "value": {
+      "cmd": "INSERT",
+      "qual": null,
+      "check": "((user_id = ( SELECT auth.uid() AS uid)) AND (EXISTS ( SELECT 1\n   FROM mg_public_entries p\n  WHERE (p.id = mg_likes.entry_id))))",
+      "roles": [
+        "authenticated"
+      ],
+      "permissive": "PERMISSIVE"
+    }
+  },
+  {
+    "kind": "policy",
+    "name": "public.mg_likes.likes_read",
+    "value": {
+      "cmd": "SELECT",
+      "qual": "((NOT maeum_internal.is_blocked(user_id)) AND (EXISTS ( SELECT 1\n   FROM mg_public_entries p\n  WHERE (p.id = mg_likes.entry_id))))",
+      "check": null,
+      "roles": [
+        "anon",
+        "authenticated"
+      ],
+      "permissive": "PERMISSIVE"
+    }
+  },
+  {
+    "kind": "policy",
+    "name": "public.mg_media_gc.media_gc_delete",
+    "value": {
+      "cmd": "DELETE",
+      "qual": "(owner_id = ( SELECT auth.uid() AS uid))",
+      "check": null,
+      "roles": [
+        "authenticated"
+      ],
+      "permissive": "PERMISSIVE"
+    }
+  },
+  {
+    "kind": "policy",
+    "name": "public.mg_media_gc.media_gc_insert",
+    "value": {
+      "cmd": "INSERT",
+      "qual": null,
+      "check": "((owner_id = ( SELECT auth.uid() AS uid)) AND (split_part(photo_path, '/'::text, 1) = (( SELECT auth.uid() AS uid))::text) AND (photo_path ~ '^[0-9a-f-]{36}/[0-9a-f-]{36}$'::text))",
+      "roles": [
+        "authenticated"
+      ],
+      "permissive": "PERMISSIVE"
+    }
+  },
+  {
+    "kind": "policy",
+    "name": "public.mg_media_gc.media_gc_read",
+    "value": {
+      "cmd": "SELECT",
+      "qual": "(owner_id = ( SELECT auth.uid() AS uid))",
+      "check": null,
+      "roles": [
+        "authenticated"
+      ],
+      "permissive": "PERMISSIVE"
+    }
+  },
+  {
+    "kind": "policy",
+    "name": "public.mg_notifications.notifications_delete",
+    "value": {
+      "cmd": "DELETE",
+      "qual": "(recipient_id = ( SELECT auth.uid() AS uid))",
+      "check": null,
+      "roles": [
+        "authenticated"
+      ],
+      "permissive": "PERMISSIVE"
+    }
+  },
+  {
+    "kind": "policy",
+    "name": "public.mg_notifications.notifications_read",
+    "value": {
+      "cmd": "SELECT",
+      "qual": "((recipient_id = ( SELECT auth.uid() AS uid)) AND (NOT maeum_internal.is_blocked(actor_id)))",
+      "check": null,
+      "roles": [
+        "authenticated"
+      ],
+      "permissive": "PERMISSIVE"
+    }
+  },
+  {
+    "kind": "policy",
+    "name": "public.mg_profiles.profiles_insert",
+    "value": {
+      "cmd": "INSERT",
+      "qual": null,
+      "check": "(id = ( SELECT auth.uid() AS uid))",
+      "roles": [
+        "authenticated"
+      ],
+      "permissive": "PERMISSIVE"
+    }
+  },
+  {
+    "kind": "policy",
+    "name": "public.mg_profiles.profiles_read",
+    "value": {
+      "cmd": "SELECT",
+      "qual": "(NOT maeum_internal.is_blocked(id))",
+      "check": null,
+      "roles": [
+        "anon",
+        "authenticated"
+      ],
+      "permissive": "PERMISSIVE"
+    }
+  },
+  {
+    "kind": "policy",
+    "name": "public.mg_profiles.profiles_update",
+    "value": {
+      "cmd": "UPDATE",
+      "qual": "(id = ( SELECT auth.uid() AS uid))",
+      "check": "(id = ( SELECT auth.uid() AS uid))",
+      "roles": [
+        "authenticated"
+      ],
+      "permissive": "PERMISSIVE"
+    }
+  },
+  {
+    "kind": "policy",
+    "name": "public.mg_public_entries.public_entries_read",
+    "value": {
+      "cmd": "SELECT",
+      "qual": "(NOT maeum_internal.is_blocked(owner_id))",
+      "check": null,
+      "roles": [
+        "anon",
+        "authenticated"
+      ],
+      "permissive": "PERMISSIVE"
+    }
+  },
+  {
+    "kind": "policy",
+    "name": "public.mg_reports.reports_insert",
+    "value": {
+      "cmd": "INSERT",
+      "qual": null,
+      "check": "((reporter_id = ( SELECT auth.uid() AS uid)) AND (EXISTS ( SELECT 1\n   FROM mg_public_entries p\n  WHERE (p.id = mg_reports.entry_id))))",
+      "roles": [
+        "authenticated"
+      ],
+      "permissive": "PERMISSIVE"
+    }
+  },
+  {
+    "kind": "policy",
+    "name": "public.mg_reports.reports_read",
+    "value": {
+      "cmd": "SELECT",
+      "qual": "(reporter_id = ( SELECT auth.uid() AS uid))",
+      "check": null,
+      "roles": [
+        "authenticated"
+      ],
+      "permissive": "PERMISSIVE"
+    }
+  },
+  {
+    "kind": "policy",
+    "name": "storage.objects.maeum_photo_delete",
+    "value": {
+      "cmd": "DELETE",
+      "qual": "((bucket_id = 'maeum-photos'::text) AND (split_part(name, '/'::text, 1) = (( SELECT auth.uid() AS uid))::text) AND (EXISTS ( SELECT 1\n   FROM mg_profiles\n  WHERE (mg_profiles.id = ( SELECT auth.uid() AS uid)))))",
+      "check": null,
+      "roles": [
+        "authenticated"
+      ],
+      "permissive": "PERMISSIVE"
+    }
+  },
+  {
+    "kind": "policy",
+    "name": "storage.objects.maeum_photo_insert",
+    "value": {
+      "cmd": "INSERT",
+      "qual": null,
+      "check": "((bucket_id = 'maeum-photos'::text) AND (split_part(name, '/'::text, 1) = (( SELECT auth.uid() AS uid))::text) AND (name ~ '^[0-9a-f-]{36}/[0-9a-f-]{36}-(full|thumb)\\.jpg$'::text) AND (EXISTS ( SELECT 1\n   FROM mg_profiles\n  WHERE (mg_profiles.id = ( SELECT auth.uid() AS uid)))))",
+      "roles": [
+        "authenticated"
+      ],
+      "permissive": "PERMISSIVE"
+    }
+  },
+  {
+    "kind": "policy",
+    "name": "storage.objects.maeum_photo_read",
+    "value": {
+      "cmd": "SELECT",
+      "qual": "((bucket_id = 'maeum-photos'::text) AND (((split_part(name, '/'::text, 1) = (( SELECT auth.uid() AS uid))::text) AND (EXISTS ( SELECT 1\n   FROM mg_profiles\n  WHERE (mg_profiles.id = ( SELECT auth.uid() AS uid))))) OR (EXISTS ( SELECT 1\n   FROM mg_public_entries p\n  WHERE ((objects.name = (p.photo_path || '-full.jpg'::text)) OR (objects.name = (p.photo_path || '-thumb.jpg'::text)))))))",
+      "check": null,
+      "roles": [
+        "anon",
+        "authenticated"
+      ],
+      "permissive": "PERMISSIVE"
+    }
+  },
+  {
+    "kind": "table",
+    "name": "maeum_internal.write_windows",
+    "value": {
+      "rls": true,
+      "forceRls": false
+    }
+  },
+  {
+    "kind": "table",
+    "name": "public.mg_blocks",
+    "value": {
+      "rls": true,
+      "forceRls": false
+    }
+  },
+  {
+    "kind": "table",
+    "name": "public.mg_comments",
+    "value": {
+      "rls": true,
+      "forceRls": false
+    }
+  },
+  {
+    "kind": "table",
+    "name": "public.mg_drafts",
+    "value": {
+      "rls": true,
+      "forceRls": false
+    }
+  },
+  {
+    "kind": "table",
+    "name": "public.mg_entries",
+    "value": {
+      "rls": true,
+      "forceRls": false
+    }
+  },
+  {
+    "kind": "table",
+    "name": "public.mg_follows",
+    "value": {
+      "rls": true,
+      "forceRls": false
+    }
+  },
+  {
+    "kind": "table",
+    "name": "public.mg_likes",
+    "value": {
+      "rls": true,
+      "forceRls": false
+    }
+  },
+  {
+    "kind": "table",
+    "name": "public.mg_media_gc",
+    "value": {
+      "rls": true,
+      "forceRls": false
+    }
+  },
+  {
+    "kind": "table",
+    "name": "public.mg_notifications",
+    "value": {
+      "rls": true,
+      "forceRls": false
+    }
+  },
+  {
+    "kind": "table",
+    "name": "public.mg_profiles",
+    "value": {
+      "rls": true,
+      "forceRls": false
+    }
+  },
+  {
+    "kind": "table",
+    "name": "public.mg_public_entries",
+    "value": {
+      "rls": true,
+      "forceRls": false
+    }
+  },
+  {
+    "kind": "table",
+    "name": "public.mg_reports",
+    "value": {
+      "rls": true,
+      "forceRls": false
+    }
+  },
+  {
+    "kind": "table-grant",
+    "name": "public.mg_blocks:authenticated:DELETE",
+    "value": false
+  },
+  {
+    "kind": "table-grant",
+    "name": "public.mg_blocks:authenticated:INSERT",
+    "value": false
+  },
+  {
+    "kind": "table-grant",
+    "name": "public.mg_blocks:authenticated:SELECT",
+    "value": false
+  },
+  {
+    "kind": "table-grant",
+    "name": "public.mg_comments:anon:SELECT",
+    "value": false
+  },
+  {
+    "kind": "table-grant",
+    "name": "public.mg_comments:authenticated:DELETE",
+    "value": false
+  },
+  {
+    "kind": "table-grant",
+    "name": "public.mg_comments:authenticated:INSERT",
+    "value": false
+  },
+  {
+    "kind": "table-grant",
+    "name": "public.mg_comments:authenticated:SELECT",
+    "value": false
+  },
+  {
+    "kind": "table-grant",
+    "name": "public.mg_drafts:authenticated:SELECT",
+    "value": false
+  },
+  {
+    "kind": "table-grant",
+    "name": "public.mg_entries:authenticated:SELECT",
+    "value": false
+  },
+  {
+    "kind": "table-grant",
+    "name": "public.mg_follows:anon:SELECT",
+    "value": false
+  },
+  {
+    "kind": "table-grant",
+    "name": "public.mg_follows:authenticated:DELETE",
+    "value": false
+  },
+  {
+    "kind": "table-grant",
+    "name": "public.mg_follows:authenticated:INSERT",
+    "value": false
+  },
+  {
+    "kind": "table-grant",
+    "name": "public.mg_follows:authenticated:SELECT",
+    "value": false
+  },
+  {
+    "kind": "table-grant",
+    "name": "public.mg_likes:anon:SELECT",
+    "value": false
+  },
+  {
+    "kind": "table-grant",
+    "name": "public.mg_likes:authenticated:DELETE",
+    "value": false
+  },
+  {
+    "kind": "table-grant",
+    "name": "public.mg_likes:authenticated:INSERT",
+    "value": false
+  },
+  {
+    "kind": "table-grant",
+    "name": "public.mg_likes:authenticated:SELECT",
+    "value": false
+  },
+  {
+    "kind": "table-grant",
+    "name": "public.mg_media_gc:authenticated:DELETE",
+    "value": false
+  },
+  {
+    "kind": "table-grant",
+    "name": "public.mg_media_gc:authenticated:INSERT",
+    "value": false
+  },
+  {
+    "kind": "table-grant",
+    "name": "public.mg_media_gc:authenticated:SELECT",
+    "value": false
+  },
+  {
+    "kind": "table-grant",
+    "name": "public.mg_notifications:authenticated:DELETE",
+    "value": false
+  },
+  {
+    "kind": "table-grant",
+    "name": "public.mg_notifications:authenticated:SELECT",
+    "value": false
+  },
+  {
+    "kind": "table-grant",
+    "name": "public.mg_profiles:anon:SELECT",
+    "value": false
+  },
+  {
+    "kind": "table-grant",
+    "name": "public.mg_profiles:authenticated:INSERT",
+    "value": false
+  },
+  {
+    "kind": "table-grant",
+    "name": "public.mg_profiles:authenticated:SELECT",
+    "value": false
+  },
+  {
+    "kind": "table-grant",
+    "name": "public.mg_profiles:authenticated:UPDATE",
+    "value": false
+  },
+  {
+    "kind": "table-grant",
+    "name": "public.mg_public_entries:anon:SELECT",
+    "value": false
+  },
+  {
+    "kind": "table-grant",
+    "name": "public.mg_public_entries:authenticated:SELECT",
+    "value": false
+  },
+  {
+    "kind": "table-grant",
+    "name": "public.mg_reports:authenticated:INSERT",
+    "value": false
+  },
+  {
+    "kind": "table-grant",
+    "name": "public.mg_reports:authenticated:SELECT",
+    "value": false
+  },
+  {
+    "kind": "trigger",
+    "name": "public.mg_blocks.block_effects",
+    "value": "CREATE TRIGGER block_effects AFTER INSERT ON mg_blocks FOR EACH ROW EXECUTE FUNCTION maeum_internal.social_effects()"
+  },
+  {
+    "kind": "trigger",
+    "name": "public.mg_blocks.guard_block",
+    "value": "CREATE TRIGGER guard_block BEFORE INSERT ON mg_blocks FOR EACH ROW EXECUTE FUNCTION maeum_internal.social_write()"
+  },
+  {
+    "kind": "trigger",
+    "name": "public.mg_comments.comment_effects",
+    "value": "CREATE TRIGGER comment_effects AFTER INSERT ON mg_comments FOR EACH ROW EXECUTE FUNCTION maeum_internal.social_effects()"
+  },
+  {
+    "kind": "trigger",
+    "name": "public.mg_comments.guard_comment",
+    "value": "CREATE TRIGGER guard_comment BEFORE INSERT ON mg_comments FOR EACH ROW EXECUTE FUNCTION maeum_internal.social_write()"
+  },
+  {
+    "kind": "trigger",
+    "name": "public.mg_entries.prepare_entry",
+    "value": "CREATE TRIGGER prepare_entry BEFORE INSERT OR UPDATE ON mg_entries FOR EACH ROW EXECUTE FUNCTION maeum_internal.prepare_entry()"
+  },
+  {
+    "kind": "trigger",
+    "name": "public.mg_entries.prepare_social_entry",
+    "value": "CREATE TRIGGER prepare_social_entry BEFORE INSERT OR UPDATE ON mg_entries FOR EACH ROW EXECUTE FUNCTION maeum_internal.prepare_social_entry()"
+  },
+  {
+    "kind": "trigger",
+    "name": "public.mg_entries.project_entry",
+    "value": "CREATE TRIGGER project_entry AFTER INSERT OR UPDATE ON mg_entries FOR EACH ROW EXECUTE FUNCTION maeum_internal.project_entry()"
+  },
+  {
+    "kind": "trigger",
+    "name": "public.mg_follows.follow_effects",
+    "value": "CREATE TRIGGER follow_effects AFTER INSERT ON mg_follows FOR EACH ROW EXECUTE FUNCTION maeum_internal.social_effects()"
+  },
+  {
+    "kind": "trigger",
+    "name": "public.mg_follows.guard_follow",
+    "value": "CREATE TRIGGER guard_follow BEFORE INSERT ON mg_follows FOR EACH ROW EXECUTE FUNCTION maeum_internal.social_write()"
+  },
+  {
+    "kind": "trigger",
+    "name": "public.mg_likes.guard_like",
+    "value": "CREATE TRIGGER guard_like BEFORE INSERT ON mg_likes FOR EACH ROW EXECUTE FUNCTION maeum_internal.social_write()"
+  },
+  {
+    "kind": "trigger",
+    "name": "public.mg_likes.like_effects",
+    "value": "CREATE TRIGGER like_effects AFTER INSERT ON mg_likes FOR EACH ROW EXECUTE FUNCTION maeum_internal.social_effects()"
+  },
+  {
+    "kind": "trigger",
+    "name": "public.mg_reports.guard_report",
+    "value": "CREATE TRIGGER guard_report BEFORE INSERT ON mg_reports FOR EACH ROW EXECUTE FUNCTION maeum_internal.social_write()"
+  }
+]

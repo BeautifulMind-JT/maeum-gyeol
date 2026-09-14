@@ -14,3 +14,7 @@ dist/mobile/
 .vercel/
 vercel-dist/
 supabase/.temp/
+
+release-manifest.json
+recreated-schema.json
+node_modules

@@ -1,4 +1,4 @@
-# 마음결 · Mindful Moments · 0.7.0
+# 마음결 · Mindful Moments · 0.7.1
 
 일상의 감각에 주의를 기울이고, 알아차린 순간을 기록하며 서로의 경험을 나누는 마음챙김 앱입니다. 와인 테이스팅은 첫 연습 맥락이며 와인 없이도 사용할 수 있습니다.
 
@@ -8,7 +8,7 @@
 
 **개인적 경험의 축적과 공유·발견은 마음결의 두 핵심 축입니다.** Letterboxd에서 지향한 개인 아카이브, 감상과 취향의 표현, 다른 사람의 기록을 읽고 대화하는 경험을 함께 유지합니다. 기록 → 선택적 공개 → 발견 → 상세·작성자 아카이브 → 공감·대화 → 다시 기록하는 흐름을 제품 기준으로 삼습니다. 공개 여부는 사용자가 선택하며, 비공개 원본과 개인 돌아보기는 보호합니다.
 
-2026-09-14 기준 앱 소스는 `78728e7`의 0.7.0이며, 운영에서 확인한 0.7.1 작성자 조회 수정의 소스 동기화는 M0 과제로 남아 있습니다. 블루프린트의 GitHub 보관은 M0 구현이나 앱 배포 완료를 뜻하지 않습니다.
+앱 0.7.1의 소스 동기화와 재현 검사는 [M0 실행 명세](docs/M0-IMPLEMENTATION.md)와 [릴리스 기록](docs/release-0.7.1.md)에서 관리합니다. M0의 검증 범위는 실제 이용 안정성과 구분합니다.
 
 ## 1안: 여름의 표지
 
@@ -39,17 +39,18 @@
 
 ## 개발과 검증
 
-Node.js 22 이상. 루트와 `mobile/`에서 각각 `npm ci`.
+재현 기준 Node.js 24.19.0 (.node-version). 루트와 `mobile/`에서 각각 `npm ci`.
 
 ```sh
 npm test
 npm --prefix mobile test
-npm run build:vercel
+npm run build:production
+npm run release:manifest
 node scripts/check-source.mjs
 npm run dev -- --host 0.0.0.0 --port 4173
 ```
 
-빌드에는 `MAEUM_SUPABASE_URL`, `MAEUM_SUPABASE_PUBLISHABLE_KEY`를 제공합니다. URL과 공개용 `sb_publishable_` 키만 번들에 포함합니다. 설정 없이 빌드하면 연습만 가능하며 기기 저장 모드로 전환하지 않습니다.
+`build:production`은 `config/production-public.json`의 공개 설정을 사용합니다. 외부 환경으로 빌드할 때는 `build:vercel`에 `MAEUM_SUPABASE_URL`, `MAEUM_SUPABASE_PUBLISHABLE_KEY`를 제공합니다. URL과 공개용 `sb_publishable_` 키만 번들에 포함합니다. 설정 없이 빌드하면 연습만 가능하며 기기 저장 모드로 전환하지 않습니다.
 
 개발 서버 `/preview/`는 테스트용 PostgreSQL(PGlite)과 예시 계정을 사용합니다. `/`의 화면 크기·초안 오류·응답 유실 버튼으로 재현할 수 있습니다. `tests/fixtures/`는 운영 번들에 포함되지 않습니다. 운영 연결 없이 UI와 실제 SQL 트랜잭션을 함께 검증하기 위한 환경입니다.
 
@@ -67,3 +68,6 @@ Supabase 전용 프로젝트는 `vmvtpolyszkyachlqlki`, Vercel 프로젝트는 `
 
 실서비스 OTP·사진 업로드의 전체 사용자 여정과 새 APK·iOS 빌드는 별도 검증 대상입니다.
 
+## 현재 개발 기준
+
+단계 명칭과 완료 기준은 [개발 기준 1.1](docs/BLUEPRINT.md), 이번 변경은 [0.7.1](docs/release-0.7.1.md)을 따릅니다. M0는 재현과 발견 오류 검증이며 실제 이용 검증 M1·M2와 구분합니다. GitHub Actions의 M0 reproducibility가 새 체크아웃·DB 재생성·실제 PostgREST 회귀 검사·운영 빌드와 전체 파일 목록을 생성합니다.

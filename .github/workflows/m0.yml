@@ -1,0 +1,84 @@
+name: M0 reproducibility
+on:
+  push:
+    branches: [main]
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  reproduce:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:17.6
+        env:
+          POSTGRES_PASSWORD: maeum_ci_only
+          POSTGRES_DB: maeum_m0
+        ports:
+          - 54322:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d maeum_m0"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            mobile/package-lock.json
+      - name: Install locked dependencies
+        run: |
+          npm ci
+          npm ci --prefix mobile
+      - name: Existing regression tests and source scan
+        run: |
+          npm test
+          npm --prefix mobile test
+          node scripts/check-source.mjs
+      - name: Recreate application DB from migrations
+        env:
+          PG_CONTAINER: ${{ job.services.postgres.id }}
+        run: |
+          docker exec -i "$PG_CONTAINER" psql -U postgres -d maeum_m0 -v ON_ERROR_STOP=1 < tests/integration/prerequisites.sql
+          for migration in supabase/migrations/*.sql; do
+            docker exec -i "$PG_CONTAINER" psql -U postgres -d maeum_m0 -v ON_ERROR_STOP=1 < "$migration"
+          done
+          docker exec -i "$PG_CONTAINER" psql -U postgres -d maeum_m0 -v ON_ERROR_STOP=1 -tA < scripts/schema-snapshot.sql > recreated-schema.json
+          node scripts/verify-schema.mjs
+          docker exec -i "$PG_CONTAINER" psql -U postgres -d maeum_m0 -v ON_ERROR_STOP=1 < tests/integration/seed.sql
+      - name: Start pinned actual PostgREST
+        run: |
+          docker run -d --name maeum-postgrest --network host \
+            -e PGRST_DB_URI=postgres://authenticator:maeum_ci_only@127.0.0.1:54322/maeum_m0 \
+            -e PGRST_DB_SCHEMAS=public -e PGRST_DB_ANON_ROLE=anon \
+            -e PGRST_SERVER_HOST=127.0.0.1 -e PGRST_SERVER_PORT=54323 \
+            postgrest/postgrest:v16.3
+          node scripts/wait-postgrest.mjs
+      - name: Old query failure and production query success
+        env:
+          MAEUM_TEST_REST_URL: http://127.0.0.1:54323
+        run: npm run test:api
+      - name: Build exact commit and inventory every deployment file
+        run: |
+          npm run build:production
+          npm run release:manifest
+          git diff --exit-code
+      - uses: actions/upload-artifact@v4
+        with:
+          name: m0-${{ github.sha }}
+          path: |
+            vercel-dist/
+            release-manifest.json
+            recreated-schema.json
+          if-no-files-found: error
+          retention-days: 30
+      - name: Service logs on failure
+        if: failure()
+        run: docker logs maeum-postgrest || true

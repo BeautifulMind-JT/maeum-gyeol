@@ -1,0 +1,21 @@
+{
+  "verifiedAt": "2026-09-14",
+  "method": "SHA-256 of UTF-8 source bytes equals SHA-256 of deployed schema_migrations statements joined with LF",
+  "migrations": [
+    {
+      "file": "20260910050715_shared_mindful_journal.sql",
+      "hostedVersion": "20260910052453",
+      "sha256": "530f5f7f6baae3c037a2822665e40b6c7fbe39826f6ca86717bb76b501745ec5"
+    },
+    {
+      "file": "20260911005457_social_archive.sql",
+      "hostedVersion": "20260911011426",
+      "sha256": "a8ccf21b2faa1bd9a436edd930ed324205f7eed1c4e1199c19016405317bb061"
+    },
+    {
+      "file": "20260911045757_cloud_only_journal.sql",
+      "hostedVersion": "20260911062410",
+      "sha256": "7f69c6e0122ddb804f6ae97c57bf17ba157889eacb0ee0e78a1e0621a9ab63ba"
+    }
+  ]
+}
