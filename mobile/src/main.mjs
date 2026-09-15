@@ -7,18 +7,20 @@ import {shareText} from './storage.mjs';
 import {native,storageAdapter,createStorageAdapter,createAuthStorage,openCommunity,shareMoment,savePhoto,speak,stopSpeech,bindLifecycle,minimize} from './runtime.mjs';
 import {createServerJournal} from './server-journal.mjs';
 import {loadCloud} from './cloud.mjs';
+import {captureOAuthCallback} from './oauth.mjs';
 import {createCloudUI} from './cloud-ui.mjs';
 import {icon,stageOf,cover,momentCard,reviewCard,stats,emptyJournal,entryImage,entryHeading} from './presentation.mjs';
 document.querySelectorAll('[data-icon]').forEach(el=>{el.innerHTML=icon(el.dataset.icon);});
 const main=document.querySelector('main'),dialog=document.querySelector('dialog'),dialogContent=document.querySelector('#dialog-content');
 let journal=null,cloud=null,accountUser=null,cloudError='',syncState='',authEpoch=0,authReady=Promise.resolve(),legacyError='',pendingIntent=null;
+let authCallbackPending=false;
 let draftDirty=false,draftGeneration=0,finishSnapshot=null,archiveRows=[],draftFailure=null;
 let view='home',draft=null,record=null,clock=null,voice=true,speechError='',cueKey='',viewEpoch=0,toastTimer,draftTimer,saving=false;
 const photos=createPhotoLoader(()=>cloud);
 let photoUpload=null,archiveQuery='',archiveStage='',archiveLayout='grid';
 const dateLabel=d=>new Intl.DateTimeFormat('ko-KR',{year:'numeric',month:'long',day:'numeric'}).format(new Date(d));
 function toast(text){const el=document.querySelector('.toast');el.textContent=text;el.classList.add('visible');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('visible'),4200);}
-const cloudUI=createCloudUI({main,native,hydrate:()=>photos.hydrate(main),shareMoment,cloud:()=>cloud,user:()=>accountUser,journal:()=>journal,legacyInfo,importLegacyGuest,importLegacyAccount,legacyError:()=>legacyError,afterLogin,record:()=>record,cloudError:()=>cloudError,syncState:()=>syncState,current:()=>view,leave,screen,popup,toast,settings,list,detail,closeDialog:()=>dialog.close(),sync:()=>syncCloud(),changeUser});
+const cloudUI=createCloudUI({main,native,hydrate:()=>photos.hydrate(main),shareMoment,cloud:()=>cloud,user:()=>accountUser,journal:()=>journal,legacyInfo,importLegacyGuest,importLegacyAccount,legacyError:()=>legacyError,afterLogin,startGoogle,googleLoginBlocked,record:()=>record,cloudError:()=>cloudError,syncState:()=>syncState,current:()=>view,leave,screen,popup,toast,settings,list,detail,closeDialog:()=>dialog.close(),sync:()=>syncCloud(),changeUser});
 async function syncCloud({quiet=false}={}){
  if(!journal)return;const j=journal;
  try{await j.sync();if(j!==journal)return;syncState='기록은 내 계정에 보관돼요.';cloud.cleanupPhotos({includeDrafts:true}).catch(()=>{});}
@@ -36,6 +38,8 @@ function changeUser(user){
 }
 async function requireAccount(intent){if(accountUser&&journal)return true;pendingIntent=intent;await cloudUI.account();return false;}
 async function afterLogin(){await authReady;const intent=pendingIntent;pendingIntent=null;if(intent?.kind==='editor')return editor(intent.value);if(intent?.kind==='journal')return list();return cloudUI.account();}
+function googleLoginBlocked(){return Boolean(pendingIntent?.value||clock?.elapsed>0||draftDirty||finishSnapshot);}
+async function startGoogle(){if(native||googleLoginBlocked())throw Error('지금 남기던 순간을 이어가려면 이메일로 로그인해주세요.');const epoch=viewEpoch,user=accountUser;await leave();await cloud.google.start(pendingIntent?.kind||'account',()=>epoch===viewEpoch&&user===accountUser&&!googleLoginBlocked());}
 function screen(name){photos.release();if(['home','journal','settings','account','entry','editor','practice'].includes(name))history.replaceState(null,'','#'+(['entry','editor'].includes(name)?'journal':name==='practice'?'home':name));view=name;viewEpoch++;document.body.dataset.view=name;document.body.classList.toggle('practicing',name==='practice');const active=['entry','editor'].includes(name)?'journal':['public-entry','profile','people','notifications'].includes(name)?'together':name==='account'?'settings':name;document.querySelectorAll('.main-nav button').forEach(b=>b.setAttribute('aria-current',b.dataset.action===active?'page':'false'));document.querySelector('.header-back').hidden=!['entry','public-entry','editor'].includes(name);document.querySelector('.main-nav [data-icon=home]').innerHTML=icon(active==='home'?'home-fill':'home');main.focus({preventScroll:true});window.scrollTo(0,0);return viewEpoch;}
 function popup(title,body,actions){dialogContent.innerHTML=`<h2>${title}</h2>${body}<div class="dialog-actions">${actions}<button class="quiet" data-action="close">돌아가기</button></div>`;if(!dialog.open)dialog.showModal();}
 function pause(){if(clock?.running){clock.pause(performance.now());stopSpeech();if(view==='practice')updatePlayer();}}
@@ -74,7 +78,7 @@ function player(){screen('practice');const s=clock.snapshot(),stage=STAGES[s.sta
  main.innerHTML=`<section class="player"><div class="section-line"><p class="eyebrow">3분 마음챙김</p><button class="quiet" data-action="finish-early">마치기</button></div><ol class="stage-track">${STAGES.map((v,i)=>`<li ${i===s.stage?'aria-current="step"':''}><span>0${i+1}</span>${v.label}</li>`).join('')}</ol><p class="eyebrow current-stage">${stage.english}</p><h1>${stage.title}</h1><p class="cue" aria-live="polite">${stage.cues[s.cueIndex].text}</p><p class="rest">${stage.rest}</p><div class="player-meta"><span id="speech-status">${voice?'음성으로 따라가기':'화면으로 따라가기'}</span><time id="remaining"></time></div><progress max="180" value="${clock.elapsed}" aria-label="마음챙김 진행률"></progress><button class="primary" data-action="pause" id="pause-control"></button><div class="player-bottom"><button class="quiet" data-action="voice" id="voice-control"></button><button class="quiet" data-action="next-stage">${s.stage===3?'기록하기':'다음 연습 →'}</button></div><p class="hint" id="speech-error" role="status"></p><p class="hint center">화면을 떠나면 연습이 잠시 멈춰요.</p></section>`;
  updatePlayer();
 }
-function updatePlayer(){if(view!=='practice')return;const s=clock.snapshot();document.querySelector('#remaining').textContent=Math.floor(s.remaining/60)+':'+String(s.remaining%60).padStart(2,'0');document.querySelector('progress').value=clock.elapsed;document.querySelector('#pause-control').textContent=clock.running?'잠시 멈추기':'이어가기';const voiceControl=document.querySelector('#voice-control');voiceControl.textContent=voice?'음성 켜짐':'음성 꺼짐';voiceControl.setAttribute('aria-pressed',String(voice));document.querySelector('#speech-error').textContent=speechError;}
+function updatePlayer(){if(view!=='practice')return;const s=clock.snapshot();document.querySelector('#remaining').textContent=Math.floor(s.remaining/60)+':'+String(s.remaining%60).padStart(2,'0');document.querySelector('progress').value=clock.elapsed;document.querySelector('#pause-control').textContent=clock.running?'잠시 멈추기':'이어가기';const voiceControl=document.querySelector('#voice-control');voiceControl.textContent=voice?'음성 켜짐':'음성 꺼짐';voiceControl.setAttribute('aria-pressed',String(voice));document.querySelector('#speech-status').textContent=voice&&!speechError?'음성으로 따라가기':'화면으로 따라가기';document.querySelector('#speech-error').textContent=speechError;}
 function tick(){if(view!=='practice'||!clock?.running)return;const before=clock.snapshot();const s=clock.tick(performance.now());if(s.done){finish().catch(e=>toast(e.message));return;}if(before.stage!==s.stage)player();const key=s.stage+':'+s.cueIndex;if(key!==cueKey){cueKey=key;const text=STAGES[s.stage].cues[s.cueIndex].text;document.querySelector('.cue').textContent=text;if(voice)speak(text).catch(e=>{speechError=e.message;updatePlayer();});}updatePlayer();}
 setInterval(tick,200);
 async function finish(){pause();const value={...(draft||freshDraft()),seconds:Math.round(clock?.activeSeconds||0)};clock=null;await editor(value);}
@@ -89,8 +93,12 @@ async function attachPhoto(file){
 }
 function editorMarkup(){const stage=STAGES.find(s=>s.id===draft.stage)||STAGES[3];return `<section class="editor"><p class="eyebrow">MY MINDFUL MOMENT</p><h1>이 순간을 기록하기.</h1><p class="lead">평가보다 알아차림. 떠오른 만큼 남겨요.</p><form id="record-form">${photoField()}<label class="field"><span>어떤 순간이었나요? <small>선택</small></span><input name="context" maxlength="160" value="${esc(draft.context)}" placeholder="퇴근 후 창가에서 잠깐"></label><fieldset class="wine-fields"><legend>함께한 와인 <small>선택</small></legend><div class="wine-inputs"><label class="field"><span>와인 이름</span><input name="wineName" maxlength="160" value="${esc(draft.wineName)}" placeholder="생산자와 와인 이름"></label><label class="field"><span>빈티지</span><input name="vintage" maxlength="4" value="${esc(draft.vintage)}" placeholder="연도 / NV" autocapitalize="characters"></label></div><p class="hint">모르는 정보는 비워둬도 괜찮아요.</p></fieldset><fieldset><legend>기억에 남는 연습</legend><div class="stage-choices">${STAGES.map(s=>`<label><input type="radio" name="stage" value="${s.id}" ${draft.stage===s.id?'checked':''}><span>${s.label}</span></label>`).join('')}</div></fieldset><label class="field"><span id="note-question">${stage.question}</span><textarea name="note" maxlength="1600" required placeholder="다른 생각을 하던 나를 알아차렸고, 잔의 온도로 주의를 돌려봤어요.">${esc(draft.note)}</textarea></label><label class="check-field"><input type="checkbox" name="commentsEnabled" ${draft.commentsEnabled!==false?'checked':''}> 공개했을 때 댓글 받기</label><details class="reflection" ${draft.conversation?.length?'open':''}><summary>조금 더 돌아보기</summary><p class="hint">준비된 질문을 따라 내 경험을 살펴봐요.</p>${REFLECTIONS.slice(0,2).map((q,i)=>`<label class="field"><span>${q}</span><textarea data-reflection="${i}" maxlength="1600" placeholder="떠오르는 만큼 적어보세요.">${esc(reflectionAnswer(q))}</textarea></label>`).join('')}</details><button class="primary" type="submit">${draft.visibility==='public'?'공개된 기록 수정':'나만 보는 기록으로 저장'}</button><p class="hint center" id="draft-status" role="status">서버에 초안을 보관하고 있어요…</p><div id="draft-recovery" class="draft-recovery" hidden><button type="button" class="secondary" data-action="retry-draft">다시 저장</button><button type="button" class="quiet" data-action="copy-draft">작성한 내용 복사</button><button type="button" class="quiet" data-action="reload-draft-preview">서버의 초안 다시 열기</button></div></form></section>`;}
 async function editor(value){
+ // Bind the account and view before the first await, including the account check.
+ const j=journal,epoch=viewEpoch;
  if(!await requireAccount({kind:'editor',value:structuredClone(value||freshDraft())}))return;
- await leave();const j=journal,epoch=viewEpoch;const pending=await j.reloadDraft();if(j!==journal||epoch!==viewEpoch)return;
+ if(j!==journal||epoch!==viewEpoch)return;
+ await leave();if(j!==journal||epoch!==viewEpoch)return;
+ const pending=await j.reloadDraft();if(j!==journal||epoch!==viewEpoch)return;
  if(pending&&value&&pending.id!==value.id){popup('서버에서 작성하던 글이 있어요.','<p>작성 중인 글을 먼저 마무리해주세요. 기존 내용은 그대로 보관돼요.</p>','<button class="primary" data-action="restore-draft">작성하던 글 이어보기</button>');return;}
  screen('editor');draft=structuredClone(value||pending||freshDraft());draft.entryRevision=Number(draft.entryRevision??draft.revision)||0;draftDirty=true;draftGeneration++;draftFailure=null;finishSnapshot=null;main.innerHTML=editorMarkup();photos.hydrate(main);await flushDraft();
 }
@@ -123,11 +131,12 @@ async function list(refresh=true){if(!await requireAccount({kind:'journal'}))ret
  photos.hydrate(main);
 
 }
-async function detail(r,shouldLeave=true){if(!r)throw Error('기록을 다시 열어주세요.');if(shouldLeave)await leave();screen('entry');record=r;main.innerHTML=`<article class="record">${entryImage(r)}<div class="record-copy">${entryHeading(r)}<div class="record-meta"><time>${dateLabel(r.date)}</time><span>${esc(stageOf(r).label)}</span><span class="badge">${r.visibility==='public'?'공개':icon('lock')+' 나만 보기'}</span></div><p class="record-note">${esc(r.note)}</p>${r.conversation?.length?'<details class="reflection"><summary>나만 보는 돌아보기</summary>'+r.conversation.map(m=>'<p class="message '+m.role+'">'+esc(m.text)+'</p>').join('')+'</details>':''}<div class="record-actions"><button class="primary" data-action="share-preview">${icon('share')} 이 순간 나누기</button><button class="secondary" data-action="edit">기록 수정</button>${cloud?`<button class="secondary" data-cloud-action="${accountUser?'publish-preview':'account'}">${accountUser?(r.visibility==='public'?'나만 보기로 전환':'함께에 공개하기'):'로그인하고 계정에 보관'}</button>`:''}</div><p class="hint">돌아보기 대화는 공유 내용에 포함하지 않아요.</p>${accountUser&&r.visibility==='public'?`<div class="record-tools"><button class="quiet" data-action="pin-record">${r.featured?'대표 기록에서 빼기':'대표 기록으로 고정'}</button><button class="quiet" data-action="public-link">${icon('share')} 공개 링크 복사·공유</button><button class="quiet" data-social-action="post" data-id="${r.id}">공개된 모습 보기</button></div>`:''}${r.photoPath?'<button class="quiet" data-action="download-photo">사진 저장</button>':''}<button class="danger" data-action="delete-preview">기록 삭제</button></div></article>`;photos.hydrate(main);}
+async function detail(r,shouldLeave=true){if(!r)throw Error('기록을 다시 열어주세요.');const j=journal,epoch=viewEpoch;if(shouldLeave)await leave();if(j!==journal||epoch!==viewEpoch)return;screen('entry');record=r;main.innerHTML=`<article class="record">${entryImage(r)}<div class="record-copy">${entryHeading(r)}<div class="record-meta"><time>${dateLabel(r.date)}</time><span>${esc(stageOf(r).label)}</span><span class="badge">${r.visibility==='public'?'공개':icon('lock')+' 나만 보기'}</span></div><p class="record-note">${esc(r.note)}</p>${r.conversation?.length?'<details class="reflection"><summary>나만 보는 돌아보기</summary>'+r.conversation.map(m=>'<p class="message '+m.role+'">'+esc(m.text)+'</p>').join('')+'</details>':''}<div class="record-actions"><button class="primary" data-action="share-preview">${icon('share')} 이 순간 나누기</button><button class="secondary" data-action="edit">기록 수정</button>${cloud?`<button class="secondary" data-cloud-action="${accountUser?'publish-preview':'account'}">${accountUser?(r.visibility==='public'?'나만 보기로 전환':'함께에 공개하기'):'로그인하고 계정에 보관'}</button>`:''}</div><p class="hint">돌아보기 대화는 공유 내용에 포함하지 않아요.</p>${accountUser&&r.visibility==='public'?`<div class="record-tools"><button class="quiet" data-action="pin-record">${r.featured?'대표 기록에서 빼기':'대표 기록으로 고정'}</button><button class="quiet" data-action="public-link">${icon('share')} 공개 링크 복사·공유</button><button class="quiet" data-social-action="post" data-id="${r.id}">공개된 모습 보기</button></div>`:''}${r.photoPath?'<button class="quiet" data-action="download-photo">사진 저장</button>':''}<button class="danger" data-action="delete-preview">기록 삭제</button></div></article>`;photos.hydrate(main);}
 
 async function together(){if(cloud)return cloudUI.feed();await leave();screen('together');main.innerHTML=`<section><p class="eyebrow">SHARED MOMENTS</p><h1>각자의 순간에,<br>잠시 머물러요.</h1><p class="lead">같은 연습, 서로 다른 알아차림.<br>경험을 읽고 내 이야기를 건네보세요.</p><div class="community-card"><h2>마음결 온라인 공간</h2><p>공개된 기록을 읽고 댓글을 나눌 수 있어요. 로그인과 공개 기록 작성은 브라우저에서 이어져요.</p><button class="primary" data-action="open-community">공개된 순간 만나기 →</button></div><p class="hint">앱에 저장한 개인 기록은 자동으로 올라가지 않아요.</p></section>`;}
 async function settings(){await leave();screen('settings');main.innerHTML=`<section class="settings-page"><p class="eyebrow">MY SPACE</p><h1>나의 공간</h1><div class="settings-row"><div><h2>내 계정</h2><p>${accountUser?esc(accountUser.email||'로그인됨'):'로그인하고 여러 기기에서 이어봐요.'}</p></div><button class="small-button" data-cloud-action="account">${accountUser?'계정 관리':'로그인'}</button></div><div class="settings-about"><h2>마음결</h2><p>일상의 감각에 주의를 기울이고, 떠오르는 마음을 판단 없이 알아차리는 연습.</p><ol class="method-list"><li><b>01</b><div><h3>알아차림</h3><p>지금 주의가 어디에 있는지 살펴봐요.</p></div></li><li><b>02</b><div><h3>허용하기</h3><p>떠오르는 느낌을 바꾸려 하지 않아요.</p></div></li><li><b>03</b><div><h3>돌아오기</h3><p>흩어진 주의를 감각으로 데려와요.</p></div></li><li><b>04</b><div><h3>머무르기</h3><p>잘했는지 판단하지 않고 잠시 머물러요.</p></div></li></ol><p>와인이 없어도 괜찮아요. 일상의 어떤 감각에서든 시작할 수 있어요.</p><p class="hint">연습은 로그인 없이 사용할 수 있어요. 기록과 사진, 작성 중인 글은 로그인 후 내 계정에 보관돼요.</p></div></section>`;}
 async function action(a,el){
+ if(authCallbackPending)return;
  if(a==='back')return view==='public-entry'?together():list();
  if(a==='retry-draft')return finishSnapshot?save():flushDraft();
  if(a==='copy-draft'){captureDraft();await shareMoment([draft.context,draft.wineName,draft.vintage,draft.note,...draft.conversation.map(m=>m.text)].filter(Boolean).join('\n\n'));return;}
@@ -149,8 +158,8 @@ async function action(a,el){
  else if(a==='finish-early'){pause();popup('지금 느낀 것만 남겨도 좋아요.','<p>여기서 연습을 마치고, 알아차린 것을 짧게 기록할까요?</p>','<button class="primary" data-action="finish">기록하고 마치기</button>');}
  else if(a==='finish'){dialog.close();await finish();}
  else if(a==='write'){if(view==='editor')return;if(!await requireAccount({kind:'editor'}))return;await editor();}
- else if(a==='restore-draft'){dialog.close();if(!journal)return;await editor(await journal.reloadDraft());}
- else if(a==='entry'){const rows=await journal.list();const item=rows.find(r=>r.id===el.dataset.id);if(item)await detail(item);}
+ else if(a==='restore-draft'){dialog.close();const j=journal,epoch=viewEpoch;if(!j)return;const value=await j.reloadDraft();if(j!==journal||epoch!==viewEpoch)return;await editor(value);}
+ else if(a==='entry'){const j=journal,epoch=viewEpoch;if(!j)return;const rows=await j.list();if(j!==journal||epoch!==viewEpoch)return;const item=rows.find(r=>r.id===el.dataset.id);if(item)await detail(item);}
  else if(a==='edit')await editor(record);
  else if(a==='share-preview')popup('이 내용으로 나눌까요?',`<p class="share-preview">${esc(shareText(record))}</p><p class="hint">돌아보기 대화는 포함되지 않아요.</p>`,'<button class="primary" data-action="share">공유할 곳 선택</button>');
  else if(a==='share'){const result=await shareMoment(shareText(record));dialog.close();if(result==='copied')toast('공유할 내용을 복사했어요.');}
@@ -167,12 +176,33 @@ document.addEventListener('change',e=>{if(e.target.id==='archive-stage'){archive
 bindLifecycle({pause,back:()=>{if(dialog.open)dialog.close();else if(view==='home')minimize().catch(e=>toast(e.message));else (view==='entry'||view==='editor'?list():view==='public-entry'?together():view==='account'?settings():home()).catch(e=>toast(e.message));}}).catch(()=>{});
 if(!native&&location.hostname!=='terminal.local'&&'serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js',{updateViaCache:'none'}).catch(()=>{});
 async function routeHash(){
+ if(authCallbackPending)return;
  const [name,id]=location.hash.slice(1).split('/');
  if(name==='home')return home();if(name==='settings')return settings();if(name==='account')return cloudUI.account();if(name==='together')return together();if(name==='journal')return list();
  if(!cloud)return;
  if(name==='post')return cloudUI.showPost(id);if(name==='profile')return cloudUI.profile(id);if(name==='people')return cloudUI.people();if(name==='notifications')return cloudUI.notifications();
 }
-async function initialize(){const initialHash=location.hash;await home();try{cloud=await loadCloud(createAuthStorage());if(cloud){await changeUser(await cloud.user());cloud.onAuth(user=>changeUser(user).catch(error=>toast(error.message)));}}catch(error){cloudError=error.message;toast('계정 연결을 확인하지 못했어요. 마음챙김 연습은 사용할 수 있어요.');}if(view==='home')loadHomeFeed(viewEpoch);if(initialHash)history.replaceState(null,'',initialHash);await routeHash();}
+async function initialize(){
+ const callback=captureOAuthCallback(location,history),initialHash=location.hash;
+ let googleIntent=null,googleError='';
+ if(callback.active){authCallbackPending=true;document.body.inert=true;main.innerHTML='<p class="loading">로그인을 확인하고 있어요.</p>';}
+ try{
+ if(!callback.active)await home();
+ try{
+  cloud=await loadCloud(createAuthStorage(),{native});
+  if(cloud){
+   if(callback.active){try{googleIntent=await cloud.google.finish(callback);}catch{googleError='구글 로그인을 마치지 못했어요. 다시 시도하거나 이메일로 로그인해주세요.';}}
+   await changeUser(await cloud.user());
+   cloud.onAuth(user=>changeUser(user).catch(error=>toast(error.message)));
+  }
+ }catch(error){cloudError=error.message;toast('계정 연결을 확인하지 못했어요. 마음챙김 연습은 사용할 수 있어요.');}
+ if(callback.active){
+  if(googleIntent&&accountUser){pendingIntent={kind:googleIntent};toast('로그인했어요.');return await afterLogin();}
+  await cloudUI.account();toast(googleError||'계정 연결을 확인하지 못했어요. 다시 로그인해주세요.');return;
+ }
+ if(view==='home')loadHomeFeed(viewEpoch);if(initialHash)history.replaceState(null,'',initialHash);await routeHash();
+ }finally{if(callback.active){authCallbackPending=false;document.body.inert=false;main.focus({preventScroll:true});}}
+}
 window.addEventListener('hashchange',()=>routeHash().catch(e=>toast(e.message)));
 window.addEventListener('beforeunload',e=>{if(draftDirty||finishSnapshot||journal?.hasPending()){e.preventDefault();e.returnValue='';}});
 window.addEventListener('online',()=>{if(view==='editor'&&draftDirty&&!finishSnapshot)flushDraft().catch(()=>{});else syncCloud({quiet:true});});

@@ -31,6 +31,7 @@ test('offline static fallback never intercepts configuration or private requests
  assert.equal(w.fetch(new Request(request.url,{cache:'no-store'})),undefined);
  assert.equal(w.fetch(new Request(request.url,{method:'POST'})),undefined);
  assert.equal(w.fetch(new Request('https://other.test/mobile/main.mjs')),undefined);
+ for(const query of ['?code=private-auth-code','?error=access_denied','?_vercel_share=temporary-access'])assert.equal(w.fetch(new Request('https://example.test/mobile/'+query)),undefined);
 });
 
 test('worker activates without reloading tabs and cleans only its older caches',async()=>{

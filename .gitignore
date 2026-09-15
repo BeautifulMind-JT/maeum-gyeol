@@ -13,6 +13,7 @@ dist/mobile/
 .sites-runtime/
 .vercel/
 vercel-dist/
+cloudflare-dist/
 supabase/.temp/
 
 release-manifest.json
