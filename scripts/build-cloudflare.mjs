@@ -25,7 +25,8 @@ await writeFile(join(output,'_headers'),[
  '/*',
  '  X-Content-Type-Options: nosniff',
  '  Referrer-Policy: no-referrer',
- // Trial deployments should not become a second indexed production website.
+ // Keep preview deployments out of search; the primary Pages host is public.
+ 'https://:version.maeum-gyeol.pages.dev/*',
  '  X-Robots-Tag: noindex',
  '/mobile/sw.js',
  '  Cache-Control: no-cache',
@@ -49,4 +50,4 @@ async function check(directory){
 }
 await check(output);
 if(files>20000)throw Error('Pages Free file count exceeded.');
-console.log(JSON.stringify({target:'Cloudflare Pages trial',directory:output,files,bytes}));
+console.log(JSON.stringify({target:'Cloudflare Pages',directory:output,files,bytes}));
