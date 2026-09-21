@@ -422,6 +422,11 @@ Re-audit starts with the prior audited SHA delta and unresolved findings,
 checks affected dependencies/contracts, then issues a new current-SHA result.
 A writer evidence index is navigation, never an independent proof.
 
+Bind each audit request to the accepted auditor identity and applicable User
+designation pointer. Result identity/session must match the authenticated sender
+and that request's auditor. Revoking or changing the designation invalidates
+outstanding requests and gate results under that designation.
+
 ## 15. Consequential decision gate
 
 Decision request contains task/revision, blocking question, current
