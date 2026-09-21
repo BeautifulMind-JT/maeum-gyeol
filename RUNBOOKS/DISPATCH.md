@@ -271,6 +271,9 @@ Post-merge verification uses MERGE_SHA and the post-merge phase, not PR HEAD.
 
 A single successful check is never CI_GATE_PASS.
 
+The mechanical layer aggregates the complete project policy required for
+CURRENT_HEAD_SHA.
+
 MAEUM_GYEOL verification policy is `CI_REQUIRED`.
 
 For each CURRENT_HEAD_SHA the GitHub Actions workflow
@@ -327,9 +330,12 @@ no current-head review exists.
 The configured adapter launches configured REVIEWER_LANE_ID read-only and ends.
 
 If reviewer lane unavailable:
-`BLOCKED_REVIEW_LANE`
 
-No silent skip.
+derived state = `BLOCKED_REVIEW_LANE`
+
+Do not silently skip review; the task stays BLOCKED until review is possible.
+User may configure/assign another independent read-only reviewer; the reviewer
+must not become a writer.
 
 Accepted review result requires configured reviewer actor, matching task
 revision, matching current HEAD/evidence SHA and matching review attempt/session.
@@ -381,6 +387,8 @@ Required result fields:
 
 AUDIT_REQUEST_ID:
 AUDIT_RESULT: PASS | PASS_WITH_NOTES | FAIL | DECISION_REQUIRED
+AUDITOR_IDENTITY_OR_SESSION:
+AUDITOR_DESIGNATION_POINTER: (required when the auditor is not Astra)
 AUDITED_TASK_REVISION:
 AUDITED_HEAD_OR_EVIDENCE_SHA:
 VERIFIED_AUDIT_DEPTH:
@@ -388,7 +396,23 @@ VERIFIED_TOUCHED_AREAS:
 VERIFIED_CONTRACT_CHANGE_REQUIRED:
 FINDING_POINTERS:
 
-Mechanical layer accepts only configured ASTRA actor and current revision/SHA.
+The mechanical layer accepts an audit result only from the accepted auditor
+and only for the current task revision and current head/evidence SHA.
+
+The accepted auditor is:
+
+- the configured ASTRA actor, unless Astra authored or modified the change
+  (author conflict); or
+- under author conflict, the independent auditor designated by a configured
+  User decision event whose durable GitHub designation pointer names this
+  task/PR, TASK_REVISION and audit scope, and who did not participate in the
+  authorship.
+
+Self-review by any writer/session that participated in the change is rejected.
+Grok or the author may not designate the auditor or lower the audit floor.
+A designated-auditor result is recorded with AUDITOR_IDENTITY_OR_SESSION and
+AUDITOR_DESIGNATION_POINTER; it is never recorded as an Astra result.
+A HEAD change invalidates any prior PASS regardless of who issued it.
 
 FAIL returns exact findings to the same writer.
 DECISION_REQUIRED records blocker and emits the decision request.
@@ -413,10 +437,18 @@ Ordinary Slack text is not a decision event.
 
 ## 16. A0 final qualification
 
-A0 requires explicit authorization plus project-specific objective checks,
-including forbidden/locked/sensitive paths.
+Before A0 can complete, the mechanical layer checks the task envelope's
+explicit A0 authorization and path contract:
 
-If qualification fails:
+- A0_AUTHORIZATION_POINTER exists;
+- A0_CHANGE_KIND is one of the allowed A0 enum values;
+- actual changed paths are a subset of A0_ALLOWED_PATHS;
+- no actual changed path matches A0_FORBIDDEN_PATHS;
+- repository locked/sensitive rules are still satisfied.
+
+Grok does not generate or broaden these path lists.
+
+If A0 qualification fails:
 promote to A1 → independent review → Astra audit.
 
 A0 never bypasses repository-specific validation/bookkeeping.
@@ -469,7 +501,9 @@ All must be true:
 - no unresolved blocker/decision;
 - M0 reproducibility gate satisfied for current HEAD;
 - independent review PASS for current HEAD;
-- Astra PASS/PASS_WITH_NOTES for current task revision and HEAD;
+- PASS or PASS_WITH_NOTES from the accepted auditor (section 14; Astra, or
+  the User-designated independent auditor under author conflict) matches
+  current task revision and HEAD;
 - VERIFIED_AUDIT_DEPTH satisfies task floor and Astra-verified touched areas;
 - VERIFIED_CONTRACT_CHANGE_REQUIRED is NO, or required User decision is
   durably recorded and reflected in current task revision;
