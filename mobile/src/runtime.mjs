@@ -36,7 +36,7 @@ export function createAuthStorage(){
  const run=fn=>{const p=queue.then(fn);queue=p.catch(()=>{});return p;};
  return {getItem:key=>run(async()=>JSON.parse(await adapter.read()||'{}')[key]??null),setItem:(key,value)=>run(async()=>{const v=JSON.parse(await adapter.read()||'{}');v[key]=value;await adapter.write(JSON.stringify(v));}),removeItem:key=>run(async()=>{const v=JSON.parse(await adapter.read()||'{}');delete v[key];await adapter.write(JSON.stringify(v));})};
 }
-export async function openCommunity(){const url='https://maeum-gyeol.justice-parkit.chatgpt.site/mobile/#together';if(native)await Browser.open({url});else window.open(url,'_blank','noopener,noreferrer');}
+export async function openCommunity(){const url='https://maeum-gyeol.pages.dev/mobile/#together';if(native)await Browser.open({url});else window.open(url,'_blank','noopener,noreferrer');}
 export async function shareMoment(text){if(native){await Share.share({title:'마음결 · 내가 알아차린 순간',text,dialogTitle:'이 순간 나누기'});return;}if(navigator.share){await navigator.share({title:'마음결',text});return;}await navigator.clipboard.writeText(text);return 'copied';}
 export async function savePhoto(blob,id){
  const name='maeum-photo-'+id+'.jpg';

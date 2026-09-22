@@ -67,14 +67,13 @@ jobs:
         run: npm run test:api
       - name: Build exact commit and inventory every deployment file
         run: |
-          npm run build:cloudflare
+          npm run build
           npm run release:manifest
           git diff --exit-code
       - uses: actions/upload-artifact@v4
         with:
           name: m0-${{ github.sha }}
           path: |
-            vercel-dist/
             cloudflare-dist/
             release-manifest.json
             recreated-schema.json
