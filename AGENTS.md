@@ -359,3 +359,10 @@ Existing Auth/RLS, private/public record separation, server draft,
 idempotency/retry/response-loss recovery, storage/privacy, deletion and
 migration contracts remain authoritative. Implementing the approved policy is
 distinct from changing the policy or authority boundary.
+
+
+## KIX control-plane SoT pointer (E2)
+
+Control-plane SoT, dispatch policy, and production activation are managed in **BeautifulMind-JT/kix-protocol**, not in this sibling tree.
+See [`docs/KIX_CONTROL_PLANE_POINTER.md`](docs/KIX_CONTROL_PLANE_POINTER.md).
+Do not enable sibling runtime, copy full policy, or change activation/workflows from this pointer PR.
