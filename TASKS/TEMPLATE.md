@@ -1,16 +1,13 @@
-# Shared engineering control plane
+# Shared task envelope pointer
 
-Shared source owner: `BeautifulMind-JT/ai-ops-control-plane`. This product is not the shared control-plane host.
+Use the [canonical product policy pointer](../docs/CONTROL_PLANE_POINTER.md) and
+`.github/control-plane-client.json` to resolve the exact central commit.
+At that commit read `engineering/TASKS/TEMPLATE.md` and
+`engineering/projects/maeum-gyeol.md` for the task shape and project defaults.
+Keep the canonical task in its GitHub issue; do not duplicate the shared template here.
 
-Migration decision: https://github.com/BeautifulMind-JT/ai-ops-control-plane/issues/1
-
-Imported source pin: https://github.com/BeautifulMind-JT/ai-ops-control-plane/tree/7ad7f5008bae4004d5158075e8517e24a2d2de6a/engineering
-Target product: `BeautifulMind-JT/maeum-gyeol`. Product contracts, tasks, locked files and product CI stay here.
-
-This is source/reference extraction, NOT production cutover. The destination import must
-be independently reviewed and merged first. Do not enable a runner, copy credentials,
-start a builder or assume KIX activation/audit evidence transfers. Preserve task, owner,
-request and ledger identities. Fence/drain legacy dispatch before retiring it; never run
-two dispatchers. Runtime identity separation and host/Slack cutover are separate gates.
-
+Product-specific rules in `AGENTS.md` and approved product contracts remain mandatory.
+This compatibility pointer does not install or enable a dispatcher, change host
+settings, or transfer historical audit/activation evidence. Preserve task/owner/
+request identities and reconcile/fence unresolved launches before any cutover.
 User-only merge; no automatic fallback, retries, polling or standing routines.
