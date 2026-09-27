@@ -1,106 +1,16 @@
-# TASK ENVELOPE v4
+# Shared engineering control plane
 
-Store this envelope on the canonical GitHub task, not as a new runtime file.
-Link the existing specification; do not rewrite or duplicate it.
+Shared source owner: `BeautifulMind-JT/ai-ops-control-plane`. This product is not the shared control-plane host.
 
-## Required intake
+Migration decision: https://github.com/BeautifulMind-JT/ai-ops-control-plane/issues/1
 
-TASK_ID:
-PROJECT:
-REPO:
-CANONICAL_TASK_POINTER:
-TASK_REVISION:
-TASK_SPEC_POINTER:
-TASK_SPEC_REVISION:
-APPROVAL_POINTER:
-AUTHORITATIVE_DOC_POINTERS:
+Imported source pin: https://github.com/BeautifulMind-JT/ai-ops-control-plane/tree/7ad7f5008bae4004d5158075e8517e24a2d2de6a/engineering
+Target product: `BeautifulMind-JT/maeum-gyeol`. Product contracts, tasks, locked files and product CI stay here.
 
-The pinned specification must identify objective, scope, exclusions,
-constraints/contracts and acceptance/verification criteria. Exact section
-pointers suffice; the same issue may supply every section. No separate
-Astra approval is required for an already authorized, well-scoped task.
-Missing consequential requirements need clarification; repository investigation
-and ordinary implementation choices belong to the assigned builder.
+This is source/reference extraction, NOT production cutover. The destination import must
+be independently reviewed and merged first. Do not enable a runner, copy credentials,
+start a builder or assume KIX activation/audit evidence transfers. Preserve task, owner,
+request and ledger identities. Fence/drain legacy dispatch before retiring it; never run
+two dispatchers. Runtime identity separation and host/Slack cutover are separate gates.
 
-## Fixed defaults from RUNBOOKS/DISPATCH.md
-
-EXECUTION_CLASS: BUILDER_STANDARD
-BUILDER_ID: CONFIG_REQUIRED
-DELIVERABLE_MODE: PR
-AUDIT_FLOOR: A1
-ASTRA_GATE: NONE
-REVIEW_POLICY: REQUIRED_NON_A0
-REVIEWER_LANE_ID: CONFIG_REQUIRED
-
-For BUILDER_STANDARD, BUILDER_ID must resolve to one configured adapter such as
-DEVIN, GROK_BUILD or GLM before dispatch. Grok never chooses the builder or
-reviewer by reading the task.
-
-REPO/PROJECT must match the project map. Overrides require a durable authorized
-pointer. An unavailable builder/reviewer lane cannot silently waive or transfer
-ownership.
-
-A3 always implies ASTRA_GATE=ARCHITECTURE.
-Other ASTRA_GATE values: NONE | MILESTONE | ARCHITECTURE | RELEASE.
-
-## Conditional pointers
-
-CONTRACT_POINTERS:
-INVARIANT_POINTERS:
-LOCKED_AREAS_POINTERS:
-PHASE_OR_LAYER_POINTER:
-
-Use exact task-spec sections or existing repository documents; N/A is allowed
-only when no such requirement applies. Existing project-specific requirements
-remain mandatory; use this repository's authoritative task/specification policy.
-
-For CHEAP_MECHANICAL/A0 only:
-A0_AUTHORIZATION_POINTER:
-A0_CHANGE_KIND: TYPO | FORMAT_ONLY | DOC_MECHANICAL
-A0_ALLOWED_PATHS:
-A0_FORBIDDEN_PATHS:
-
-Other allowed DELIVERABLE_MODE values:
-NO_CHANGE_ALLOWED | NON_CODE_EVIDENCE.
-Other AUDIT_FLOOR values: A0 | A2 | A3.
-A0 requires the runbook's final qualification.
-
-## Dispatch references
-
-CONTROL_RECORD_POINTER:
-CANONICAL_SLACK_THREAD:
-
-These are provisioned by intake/User before execution; they are not invented
-by Grok. Mutable claim/session/HEAD/gate state belongs in the control record.
-
-Builder/reviewer reassignment is a durable control action. It must not create a
-second writer or bypass unresolved SUBMITTING/UNKNOWN launch state.
-
-## Owner instruction
-
-Follow the pinned task and repository rules. As the assigned builder,
-investigate, implement, debug, test/fix/retest and deliver the PR without
-routine plan approval.
-
-Do not silently change approved architecture, contracts, authority/security
-boundaries or consequential semantics. If such a change is required, stop the
-affected change and submit DECISION_REQUIRED / architecture-exception evidence.
-
-CI/review/Astra-gate feedback returns to the same active owner unless a durable
-authorized reassignment fences the prior attempt.
-
-## Completion evidence index
-
-- task revision; observed base SHA; PR and exact final HEAD/evidence SHA;
-- complete changed paths and acceptance criterion -> test/CI evidence pointers;
-- actual commands/results and repository-required evidence;
-- TOUCHED_AREAS and CONTRACT_CHANGE_REQUIRED: NO | YES (advisory only);
-- BUILDER_ID and independent review pointer when available;
-- VERIFIED_REVIEW_DEPTH / touched areas / contract-change result when reviewed;
-- Astra-gate pointer/result only when ASTRA_GATE requires it;
-- unverified behavior, remaining risks, BLOCKED/STALLED when applicable.
-
-The independent reviewer verifies touched areas and contract-change requirements for routine A1/A2 work. Astra independently re-verifies them only on an applicable Astra gate. This index does not replace repository evidence requirements or independent examination.
-No transcript, repeated status or mutable execution state belongs here.
-
-Missing required fields: BLOCKED / INCOMPLETE_TASK_ENVELOPE, field names only.
+User-only merge; no automatic fallback, retries, polling or standing routines.
