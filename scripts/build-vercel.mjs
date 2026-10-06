@@ -7,8 +7,7 @@ process.chdir(root);
 if(!process.env.MAEUM_SUPABASE_URL||!process.env.MAEUM_SUPABASE_PUBLISHABLE_KEY){
  throw Error('Vercel builds require the existing Supabase URL and publishable key.');
 }
-const env={...process.env,MAEUM_LEGACY_APP_URL:process.env.MAEUM_LEGACY_APP_URL||'https://maeum-gyeol.justice-parkit.chatgpt.site/mobile/#account'};
-const result=spawnSync(process.execPath,['mobile/build.mjs'],{cwd:root,env,stdio:'inherit'});
+const result=spawnSync(process.execPath,['mobile/build.mjs'],{cwd:root,env:process.env,stdio:'inherit'});
 if(result.error)throw result.error;
 if(result.status!==0)process.exit(result.status||1);
 await rm('vercel-dist',{recursive:true,force:true});
