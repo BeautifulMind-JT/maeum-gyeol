@@ -149,6 +149,11 @@ App Store Connect 암호화 질문:
 
 선택 6장: 기록 상세(흰 바탕·본문) 또는 설정(안전 안내·약관 링크).
 
+저장소에 미리 만들어 둔 파일은 `store/screenshots/iphone-6.9/`와
+`store/screenshots/ipad-13/`이다. 운영 Supabase나 실제 사용자 데이터는 쓰지
+않고, `npm run screenshots`가 개발 미리보기(`/preview/`)와 예시 기록으로
+다시 찍음. 산출물은 RGB PNG이며 기기 프레임은 넣지 않는다.
+
 앱 미리보기 영상은 첫 제출에 넣지 않아도 된다.
 
 ## 스토어 텍스트에 넣지 말 것

@@ -1,12 +1,17 @@
 import {database} from '../db-fixture.mjs';
-const me='11111111-1111-4111-8111-111111111111',other='22222222-2222-4222-8222-222222222222';
+const me='11111111-1111-4111-8111-111111111111',other='22222222-2222-4222-8222-222222222222',reader='33333333-3333-4333-8333-333333333333';
 export async function previewDatabase(){
- const {db,as,user,commit}=await database();await user(me);await user(other);
- await db.query('update public.mg_profiles set name=$1 where id=$2',['머무는 사람',me]);await db.query('update public.mg_profiles set name=$1 where id=$2',['수연',other]);
+ const {db,as,user,commit}=await database();await user(me);await user(other);await user(reader);
+ await db.query('update public.mg_profiles set name=$1,bio=$2 where id=$3',['머무는 사람','오늘의 감각을 천천히 모아요',me]);
+ await db.query('update public.mg_profiles set name=$1,bio=$2 where id=$3',['수연','평가보다 알아차림',other]);
+ await db.query('update public.mg_profiles set name=$1,bio=$2 where id=$3',['민재','천천히 읽는 사람',reader]);
  const one=(await commit(me,{date:'2026-09-11T09:00:00Z',context:'생각이 잠깐 멈춘 저녁',wineName:'Poliziano · Rosso di Montepulciano',vintage:'2023',note:'잔을 쥔 손에 서늘한 온기가 남았다. 향을 맞히려던 마음을 잠시 내려놓고, 지금 느껴지는 것에 머물렀다.\n\n자꾸 내일의 일이 떠올랐다. 그때마다 잔의 온도로 돌아왔다. 생각이 사라지지 않아도 괜찮았다.',visibility:'public',seconds:180,stage:'finish'})).entry;
  await commit(me,{date:'2026-09-05T09:00:00Z',context:'조금 더 느리게, 오늘',note:'창밖을 바라보다가 들숨과 날숨의 온도가 다르다는 걸 알았다.',seconds:180,stage:'texture',visibility:'private'});
+ const two=(await commit(other,{date:'2026-09-13T08:00:00Z',context:'비 그친 오후',note:'창을 열고 젖은 흙 냄새를 맡았다. 이름을 붙이지 않고, 그 냄새에만 머물렀다.',visibility:'public',seconds:180,stage:'aroma'})).entry;
+ await commit(other,{note:two.note,context:two.context,stage:two.stage,seconds:two.seconds,visibility:'public'},two.revision,two.id);
  await commit(me,{note:one.note,context:one.context,wineName:one.wine_name,vintage:one.vintage,stage:one.stage,seconds:one.seconds,visibility:'public'},one.revision,one.id);
  await as(other,()=>db.query('insert into public.mg_comments(id,entry_id,author_id,body) values($1,$2,$3,$4)',[crypto.randomUUID(),one.id,other,'저도 오늘은 온도에 집중해봤어요.']));
+ await as(reader,()=>db.query('insert into public.mg_comments(id,entry_id,author_id,body) values($1,$2,$3,$4)',[crypto.randomUUID(),two.id,reader,'흙 냄새에 머문 이야기가 오래 남아요.']));
  let serial=Promise.resolve(),fault=null;
  const q=async(sql,args=[])=>(await db.query(sql,args)).rows;
  async function invoke(action,a,uid){
