@@ -1,0 +1,78 @@
+# First TestFlight upload for app.maeumgyeol.mobile.
+# Manual only: GitHub-hosted macOS minutes are billed. Never run on push or pull_request.
+name: iOS TestFlight
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  testflight:
+    if: github.event_name == 'workflow_dispatch'
+    # GitHub-hosted macOS 26 (arm64) includes Xcode 26.6 as the default.
+    # https://docs.github.com/en/actions/reference/runners/github-hosted-runners
+    # https://github.com/actions/runner-images/blob/main/images/macos/macos-26-arm64-Readme.md
+    runs-on: macos-26
+    timeout-minutes: 75
+    env:
+      MAEUM_IOS_TEAM_ID: ${{ secrets.MAEUM_IOS_TEAM_ID }}
+      ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+      ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+      ASC_KEY_P8: ${{ secrets.ASC_KEY_P8 }}
+      MAEUM_REVIEWER_EMAIL: ${{ secrets.MAEUM_REVIEWER_EMAIL }}
+      MAEUM_SUPABASE_URL: ${{ secrets.MAEUM_SUPABASE_URL }}
+      MAEUM_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.MAEUM_SUPABASE_PUBLISHABLE_KEY }}
+      MAEUM_IOS_BUILD_NUMBER: ${{ github.run_number }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            mobile/package-lock.json
+      - name: Fail if any required secret is missing
+        run: node mobile/scripts/ios-testflight-secrets.mjs
+      - name: Confirm Xcode 26 or newer
+        run: |
+          xcodebuild -version
+          python3 - <<'PY'
+          import re, subprocess, sys
+          text = subprocess.check_output(['xcodebuild', '-version'], text=True)
+          match = re.search(r'Xcode\s+(\d+)', text)
+          if not match or int(match.group(1)) < 26:
+              sys.exit(f'Need Xcode 26+ on macos-26; got:\n{text}')
+          print(text.strip())
+          PY
+      - name: Install locked dependencies
+        run: |
+          npm ci
+          npm ci --prefix mobile
+      - name: Write App Store Connect API key
+        run: |
+          umask 077
+          key_dir="$HOME/.appstoreconnect/private_keys"
+          mkdir -p "$key_dir" "$HOME/private_keys"
+          key_path="$key_dir/AuthKey_${ASC_KEY_ID}.p8"
+          printf '%s\n' "$ASC_KEY_P8" | tr -d '\r' > "$key_path"
+          cp "$key_path" "$HOME/private_keys/AuthKey_${ASC_KEY_ID}.p8"
+          echo "ASC_KEY_PATH=$key_path" >> "$GITHUB_ENV"
+      - name: Build, sync, archive and export
+        # npm run build:ios → build.mjs, cap sync ios, then xcodebuild archive/export
+        # using the committed mobile/ios/App/ExportOptions.plist template.
+        run: npm --prefix mobile run build:ios
+      - name: Upload the IPA to TestFlight
+        run: |
+          ipa="mobile/ios/App/build/export/App.ipa"
+          if [ ! -f "$ipa" ]; then
+            echo "Export did not produce $ipa"
+            exit 1
+          fi
+          xcrun altool --upload-app --type ios --file "$ipa" --apiKey "$ASC_KEY_ID" --apiIssuer "$ASC_ISSUER_ID"
+      - name: Remove the API key from the runner
+        if: always()
+        run: |
+          rm -f "$HOME/.appstoreconnect/private_keys/AuthKey_${ASC_KEY_ID}.p8" \
+                "$HOME/private_keys/AuthKey_${ASC_KEY_ID}.p8"
