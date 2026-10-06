@@ -18,13 +18,15 @@ export async function loadCloud(storage,{native=false}={}){
  const social=socialCloud({client,actor,unwrap,account});
  const records=publicRecords(client,unwrap);
  return {
-  legacyAppUrl:config.legacyAppUrl||'',
   scope:new URL(config.url).hostname.split('.')[0],
   user,
   google:createGoogleLogin({auth:client.auth,baseUrl:config.url,publishableKey:config.publishableKey,native}),
   onAuth:fn=>client.auth.onAuthStateChange((_event,session)=>{setTimeout(()=>fn(session?.user||null),0);}),
   sendCode:email=>unwrap(client.auth.signInWithOtp({email,options:{shouldCreateUser:true}})),
   verifyCode:(email,token)=>unwrap(client.auth.verifyOtp({email,token,type:'email'})),
+  // App Review demo account only: a password login offered solely for the build-configured email.
+  reviewerEmail:config.reviewerEmail||'',
+  signInWithPassword:(email,password)=>unwrap(client.auth.signInWithPassword({email,password})),
   signOut:()=>unwrap(client.auth.signOut({scope:'local'})),
   async profile(){const u=await account();return await unwrap(client.from('mg_profiles').select('id,name,bio').eq('id',u.id).maybeSingle());},
   async ensureProfile(){const {c,u}=await actor();return unwrap(c.from('mg_profiles').upsert({id:u.id},{onConflict:'id',ignoreDuplicates:true}));},
