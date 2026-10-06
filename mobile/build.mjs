@@ -8,6 +8,8 @@ await cp('src','www',{recursive:true});
 await mkdir('www/vendor',{recursive:true});
 await build({absWorkingDir:process.cwd(),stdin:{contents:"export {createClient} from '@supabase/supabase-js';",resolveDir:fileURLToPath(new URL('..',import.meta.url))},bundle:true,format:'esm',platform:'browser',target:'es2022',minify:true,outfile:fileURLToPath(new URL('./www/vendor/supabase.mjs',import.meta.url))});
 const url=process.env.MAEUM_SUPABASE_URL||'',publishableKey=process.env.MAEUM_SUPABASE_PUBLISHABLE_KEY||'';
+// Store builds silently losing account features would strand users (and risk App Review 4.2).
+if(process.env.MAEUM_BUILD_MODE==='store'&&!(url&&publishableKey))throw Error('Store builds require MAEUM_SUPABASE_URL and MAEUM_SUPABASE_PUBLISHABLE_KEY; the public values are in config/production-public.json.');
 if(Boolean(url)!==Boolean(publishableKey))throw Error('Both Supabase URL and publishable key are required.');
 if(url&&(!/^https:\/\/[a-z0-9-]+\.supabase\.co$/.test(url)||!publishableKey.startsWith('sb_publishable_')))throw Error('Only a Supabase HTTPS URL and publishable key may be bundled.');
 const legacyAppUrl=process.env.MAEUM_LEGACY_APP_URL||'';

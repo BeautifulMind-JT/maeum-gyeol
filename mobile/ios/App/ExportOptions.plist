@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- Template for App Store Connect exports. MAEUM_IOS_TEAM_ID is a
+	     placeholder: scripts/build-ios-release.mjs copies this file into the
+	     build directory with the real Team ID taken from the MAEUM_IOS_TEAM_ID
+	     environment variable. Never commit a real Team ID here. -->
+	<key>method</key>
+	<string>app-store-connect</string>
+	<key>destination</key>
+	<string>export</string>
+	<key>signingStyle</key>
+	<string>automatic</string>
+	<key>teamID</key>
+	<string>MAEUM_IOS_TEAM_ID</string>
+	<key>uploadSymbols</key>
+	<true/>
+	<key>manageAppVersionAndBuildNumber</key>
+	<false/>
+</dict>
+</plist>
