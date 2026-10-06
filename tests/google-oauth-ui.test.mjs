@@ -10,9 +10,9 @@ const source=(await readFile(new URL('../mobile/src/cloud-ui.mjs',import.meta.ur
 const tick=()=>new Promise(resolve=>setImmediate(resolve));
 function deferred(){let resolve;const promise=new Promise(r=>{resolve=r;});return {promise,resolve};}
 
-function harness({available=async()=>false,native=false,blocked=false}={}){
+function harness({available=async()=>false,native=false,blocked=false,consent=true}={}){
  const listeners={},calls={available:0,startGoogle:0,sendCode:[],verifyCode:[],afterLogin:0},toasts=[];
- const main={innerHTML:''},codeForm={hidden:true};let view='home',user=null;
+ const main={innerHTML:''},codeForm={hidden:true},consentBox={checked:consent},reviewerForm={hidden:true};let view='home',user=null;
  const cloud={
   google:{available:async()=>{calls.available++;return available();}},
   sendCode:async email=>{calls.sendCode.push(email);},
@@ -24,10 +24,10 @@ function harness({available=async()=>false,native=false,blocked=false}={}){
   startGoogle:async()=>{calls.startGoogle++;},toast:value=>toasts.push(value),
   changeUser:async value=>{user=value;},afterLogin:async()=>{calls.afterLogin++;},
  };
- const document={addEventListener:(type,fn)=>{listeners[type]=fn;},querySelector:selector=>selector==='#cloud-code'?codeForm:null};
+ const document={addEventListener:(type,fn)=>{listeners[type]=fn;},querySelector:selector=>selector==='#cloud-code'?codeForm:selector==='#policy-consent'?consentBox:selector==='#cloud-reviewer'?reviewerForm:null};
  const context=vm.createContext({document,ctx,createSocialUI:()=>({}),esc:value=>String(value??''),icon:()=>'',Date});
  vm.runInContext(source+'\nglobalThis.ui=createCloudUI(ctx);',context,{filename:'cloud-ui.mjs'});
- return {ui:context.ui,main,calls,toasts,codeForm,
+ return {ui:context.ui,main,calls,toasts,codeForm,consentBox,reviewerForm,
   navigate(name,html){view=name;main.innerHTML=html;},
   async click(action){const button={dataset:{cloudAction:action},disabled:false,isConnected:true};listeners.click({target:{closest:()=>button}});await tick();return button;},
   async submit(form){const button={disabled:false,isConnected:true};form.querySelector=()=>button;let prevented=false;listeners.submit({target:form,preventDefault(){prevented=true;}});await tick();assert.equal(prevented,true);return button;},
@@ -77,6 +77,13 @@ test('unsaved login intent keeps email flow and hides Google without checking av
  const h=harness({blocked:true,available:async()=>true});await h.ui.account();
  assertEmailAvailable(h.main.innerHTML);assert.doesNotMatch(h.main.innerHTML,googleAction);
  assert.equal(h.calls.available,0);
+});
+
+test('Google login without the required terms consent is refused',async()=>{
+ const h=harness({available:async()=>true,consent:false});await h.ui.account();
+ const button=await h.click('google-login');
+ assert.equal(h.calls.startGoogle,0);assert.equal(h.toasts.length,1);assert.match(h.toasts[0],/동의/);
+ assert.equal(button.disabled,false);
 });
 
 test('email send and numeric-code verification still work with Google available',async()=>{

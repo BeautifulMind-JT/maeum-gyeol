@@ -18,10 +18,19 @@ test('default build creates the Pages app with a verifiable commit and complete 
  const config=JSON.parse(await read('mobile/cloud-config.json'));
  assert.match(config.url,/^https:\/\/[a-z0-9]+\.supabase\.co$/);
  assert.match(config.publishableKey,/^sb_publishable_/);
+ assert.ok(!('reviewerEmail' in config),'the public web build must not enable the review password path');
+ // Public review-compliance pages ship with the same deploy.
+ const operator=JSON.parse(await readFile('config/operator.json','utf8'));
+ for(const [path,marker] of [['terms/index.html','무관용'],['privacy/index.html','개인정보처리방침'],['support/index.html','1577-0199']]){
+  const page=await read(path);
+  assert.match(page,/<html lang="ko">/);
+  assert.ok(page.includes(marker),path+' carries its required content');
+  assert.ok(page.includes(operator.operatorName.startsWith('{{')?'<mark class="pending"':operator.operatorName),path+' reflects config/operator.json');
+ }
  execFileSync('npm',['run','release:manifest'],{stdio:'pipe'});
  const manifest=JSON.parse(await readFile('release-manifest.json','utf8'));
  assert.equal(manifest.outputDirectory,'cloudflare-dist');
- for(const path of ['_redirects','_headers','404.html','version.json','mobile/main.mjs']){
+ for(const path of ['_redirects','_headers','404.html','version.json','mobile/main.mjs','terms/index.html','privacy/index.html','support/index.html']){
   const entry=manifest.files.find(file=>file.path===path);assert.ok(entry,path);
   assert.equal(entry.sha256,createHash('sha256').update(await read(path)).digest('hex'));
  }

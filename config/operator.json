@@ -1,0 +1,12 @@
+{
+  "comment": "운영자 확정 정보. 아래 {{...}} 자리표시자를 실제 값으로 바꾸면 /privacy, /terms, /support 정적 페이지에 반영됩니다. 실제처럼 보이는 임시 값을 넣지 마세요. 자리표시자가 남아 있으면 페이지에 '확정 전'으로 표시됩니다.",
+  "operatorName": "{{OPERATOR_NAME}}",
+  "contactEmail": "{{OPERATOR_CONTACT_EMAIL}}",
+  "address": "{{OPERATOR_ADDRESS}}",
+  "privacyOfficer": "{{PRIVACY_OFFICER_NAME}}",
+  "effectiveDate": "{{POLICY_EFFECTIVE_DATE}}",
+  "retention": {
+    "serviceLogs": "{{RETENTION_SERVICE_LOGS}}",
+    "reportRecords": "{{RETENTION_REPORT_RECORDS}}"
+  }
+}
