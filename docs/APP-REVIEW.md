@@ -30,11 +30,13 @@
 
 3. **운영자 정보 확정**: `config/operator.json`의 `{{...}}` 자리표시자를 실제
    값으로 바꾸고 웹을 재배포한다(`/privacy`, `/terms`, `/support`에 반영).
-4. **App Store Connect 설정**:
+4. **TestFlight 업로드**: 첫 IPA는 `docs/TESTFLIGHT.md`의 GitHub Actions
+   워크플로로 올린다. `MAEUM_REVIEWER_EMAIL` 시크릿이 스토어 빌드에 들어간다.
+5. **App Store Connect 설정**:
    - App Privacy의 개인정보처리방침 URL: `https://maeum-gyeol.pages.dev/privacy/`
    - 지원 URL: `https://maeum-gyeol.pages.dev/support/`
    - App Review Information → Sign-in required 체크, 데모 계정 이메일/비밀번호 입력.
-5. **심사 노트 붙여넣기**: 아래 텍스트에서 `<DEMO_EMAIL>`/`<DEMO_PASSWORD>`만
+6. **심사 노트 붙여넣기**: 아래 텍스트에서 `<DEMO_EMAIL>`/`<DEMO_PASSWORD>`만
    바꿔 Review Notes에 입력한다.
 
 ## App Store Connect 심사 노트 (복사용)
