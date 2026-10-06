@@ -4,7 +4,8 @@ import {newId} from './identity.mjs';
 import {STAGES,TastingClock,TOTAL_SECONDS,REFLECTIONS} from './shared/tasting.mjs';
 import {escapeHtml as esc} from './shared/model.mjs';
 import {shareText} from './storage.mjs';
-import {native,storageAdapter,createStorageAdapter,createAuthStorage,openCommunity,shareMoment,savePhoto,speak,stopSpeech,bindLifecycle,minimize} from './runtime.mjs';
+import {native,storageAdapter,createStorageAdapter,createAuthStorage,openCommunity,openExternal,shareMoment,savePhoto,speak,stopSpeech,bindLifecycle,minimize} from './runtime.mjs';
+import {POLICY_URLS,crisisNoticeMarkup} from './policies.mjs';
 import {createServerJournal} from './server-journal.mjs';
 import {loadCloud} from './cloud.mjs';
 import {captureOAuthCallback} from './oauth.mjs';
@@ -26,6 +27,11 @@ async function syncCloud({quiet=false}={}){
  try{await j.sync();if(j!==journal)return;syncState='기록은 내 계정에 보관돼요.';cloud.cleanupPhotos({includeDrafts:true}).catch(()=>{});}
  catch(error){if(j===journal)syncState='서버에 연결하지 못했어요. 다시 시도해주세요.';if(!quiet)throw error;}
 }
+// The safety notice marker is device state like the auth session, never a record.
+const safetyStore=createStorageAdapter('safety-v1');
+async function safetySeen(){try{return JSON.parse(await safetyStore.read()||'{}').crisisNotice===true;}catch{return true;}}
+async function markSafetySeen(){try{await safetyStore.write(JSON.stringify({crisisNotice:true}));}catch{}}
+function showSafetyNotice(){popup('잠시, 안전 안내를 전해요.',crisisNoticeMarkup(),'<button class="primary" data-action="safety-ack">확인했어요</button>');}
 async function legacyInfo(){try{const raw=await storageAdapter.read(),old=raw?JSON.parse(raw):null;return {count:old?.entries?.filter(r=>!r.deleted).length||0,draft:Boolean(old?.draft),exists:Boolean(old?.entries?.length||old?.draft)};}catch{return {count:0,draft:false,exists:false};}}
 async function importLegacyGuest(){const j=journal,user=accountUser;if(!j)throw Error('로그인해주세요.');await j.migrate(storageAdapter,{owner:user.id});if(j!==journal)throw Error('계정이 바뀌었어요.');}
 async function importLegacyAccount(){const j=journal,user=accountUser;if(!j)return;const adapter=createStorageAdapter('account-'+cloud.scope+'-'+user.id);try{await j.migrate(adapter,{owner:user.id,account:true});if(j===journal)legacyError='';}catch(e){if(j===journal)legacyError=e.message;}}
@@ -134,7 +140,7 @@ async function list(refresh=true){if(!await requireAccount({kind:'journal'}))ret
 async function detail(r,shouldLeave=true){if(!r)throw Error('기록을 다시 열어주세요.');const j=journal,epoch=viewEpoch;if(shouldLeave)await leave();if(j!==journal||epoch!==viewEpoch)return;screen('entry');record=r;main.innerHTML=`<article class="record">${entryImage(r)}<div class="record-copy">${entryHeading(r)}<div class="record-meta"><time>${dateLabel(r.date)}</time><span>${esc(stageOf(r).label)}</span><span class="badge">${r.visibility==='public'?'공개':icon('lock')+' 나만 보기'}</span></div><p class="record-note">${esc(r.note)}</p>${r.conversation?.length?'<details class="reflection"><summary>나만 보는 돌아보기</summary>'+r.conversation.map(m=>'<p class="message '+m.role+'">'+esc(m.text)+'</p>').join('')+'</details>':''}<div class="record-actions"><button class="primary" data-action="share-preview">${icon('share')} 이 순간 나누기</button><button class="secondary" data-action="edit">기록 수정</button>${cloud?`<button class="secondary" data-cloud-action="${accountUser?'publish-preview':'account'}">${accountUser?(r.visibility==='public'?'나만 보기로 전환':'함께에 공개하기'):'로그인하고 계정에 보관'}</button>`:''}</div><p class="hint">돌아보기 대화는 공유 내용에 포함하지 않아요.</p>${accountUser&&r.visibility==='public'?`<div class="record-tools"><button class="quiet" data-action="pin-record">${r.featured?'대표 기록에서 빼기':'대표 기록으로 고정'}</button><button class="quiet" data-action="public-link">${icon('share')} 공개 링크 복사·공유</button><button class="quiet" data-social-action="post" data-id="${r.id}">공개된 모습 보기</button></div>`:''}${r.photoPath?'<button class="quiet" data-action="download-photo">사진 저장</button>':''}<button class="danger" data-action="delete-preview">기록 삭제</button></div></article>`;photos.hydrate(main);}
 
 async function together(){if(cloud)return cloudUI.feed();await leave();screen('together');main.innerHTML=`<section><p class="eyebrow">SHARED MOMENTS</p><h1>각자의 순간에,<br>잠시 머물러요.</h1><p class="lead">같은 연습, 서로 다른 알아차림.<br>경험을 읽고 내 이야기를 건네보세요.</p><div class="community-card"><h2>마음결 온라인 공간</h2><p>공개된 기록을 읽고 댓글을 나눌 수 있어요. 로그인과 공개 기록 작성은 브라우저에서 이어져요.</p><button class="primary" data-action="open-community">공개된 순간 만나기 →</button></div><p class="hint">앱에 저장한 개인 기록은 자동으로 올라가지 않아요.</p></section>`;}
-async function settings(){await leave();screen('settings');main.innerHTML=`<section class="settings-page"><p class="eyebrow">MY SPACE</p><h1>나의 공간</h1><div class="settings-row"><div><h2>내 계정</h2><p>${accountUser?esc(accountUser.email||'로그인됨'):'로그인하고 여러 기기에서 이어봐요.'}</p></div><button class="small-button" data-cloud-action="account">${accountUser?'계정 관리':'로그인'}</button></div><div class="settings-about"><h2>마음결</h2><p>일상의 감각에 주의를 기울이고, 떠오르는 마음을 판단 없이 알아차리는 연습.</p><ol class="method-list"><li><b>01</b><div><h3>알아차림</h3><p>지금 주의가 어디에 있는지 살펴봐요.</p></div></li><li><b>02</b><div><h3>허용하기</h3><p>떠오르는 느낌을 바꾸려 하지 않아요.</p></div></li><li><b>03</b><div><h3>돌아오기</h3><p>흩어진 주의를 감각으로 데려와요.</p></div></li><li><b>04</b><div><h3>머무르기</h3><p>잘했는지 판단하지 않고 잠시 머물러요.</p></div></li></ol><p>와인이 없어도 괜찮아요. 일상의 어떤 감각에서든 시작할 수 있어요.</p><p class="hint">연습은 로그인 없이 사용할 수 있어요. 기록과 사진, 작성 중인 글은 로그인 후 내 계정에 보관돼요.</p></div></section>`;}
+async function settings(){await leave();screen('settings');main.innerHTML=`<section class="settings-page"><p class="eyebrow">MY SPACE</p><h1>나의 공간</h1><div class="settings-row"><div><h2>내 계정</h2><p>${accountUser?esc(accountUser.email||'로그인됨'):'로그인하고 여러 기기에서 이어봐요.'}</p></div><button class="small-button" data-cloud-action="account">${accountUser?'계정 관리':'로그인'}</button></div><div class="settings-about"><h2>마음결</h2><p>일상의 감각에 주의를 기울이고, 떠오르는 마음을 판단 없이 알아차리는 연습.</p><ol class="method-list"><li><b>01</b><div><h3>알아차림</h3><p>지금 주의가 어디에 있는지 살펴봐요.</p></div></li><li><b>02</b><div><h3>허용하기</h3><p>떠오르는 느낌을 바꾸려 하지 않아요.</p></div></li><li><b>03</b><div><h3>돌아오기</h3><p>흩어진 주의를 감각으로 데려와요.</p></div></li><li><b>04</b><div><h3>머무르기</h3><p>잘했는지 판단하지 않고 잠시 머물러요.</p></div></li></ol><p>와인이 없어도 괜찮아요. 일상의 어떤 감각에서든 시작할 수 있어요.</p><p class="hint">연습은 로그인 없이 사용할 수 있어요. 기록과 사진, 작성 중인 글은 로그인 후 내 계정에 보관돼요.</p></div><div class="settings-policies"><div class="settings-row"><div><h2>안전 안내</h2><p>위기 상담 연락처와 서비스 범위 안내</p></div><button class="small-button" data-action="safety-notice">보기</button></div><div class="settings-row"><div><h2>이용약관</h2><p>커뮤니티 규칙(불쾌한 콘텐츠 무관용) 포함</p></div><button class="small-button" data-action="open-policy" data-policy="terms">보기</button></div><div class="settings-row"><div><h2>개인정보처리방침</h2><p>수집 항목과 보관·삭제 안내</p></div><button class="small-button" data-action="open-policy" data-policy="privacy">보기</button></div><div class="settings-row"><div><h2>지원·문의</h2><p>문의 연락처와 신고 처리 안내</p></div><button class="small-button" data-action="open-policy" data-policy="support">열기</button></div></div></section>`;}
 async function action(a,el){
  if(authCallbackPending)return;
  if(a==='back')return view==='public-entry'?together():list();
@@ -149,6 +155,9 @@ async function action(a,el){
  if(a==='public-link'){await shareMoment(publicLink('post',record.id));return;}
  if(a==='archive-grid'||a==='archive-diary'){archiveLayout=a==='archive-grid'?'grid':'diary';return list(false);}
  if(a==='close'){dialog.close();return;}
+ if(a==='open-policy'){await openExternal(POLICY_URLS[el.dataset.policy]||POLICY_URLS.support);return;}
+ if(a==='safety-notice'){showSafetyNotice();return;}
+ if(a==='safety-ack'){await markSafetySeen();dialog.close();return;}
  if(a==='home')await home();else if(a==='journal')await list();else if(a==='together')await together();else if(a==='settings')await settings();
  else if(a==='start')await start();else if(a==='discard-and-start'){if(accountUser&&draft?.photoPath)await cloud.releasePhoto(draft.photoPath);if(journal)await journal.storeDraft(null);await startFresh();}
  else if(a==='resume-session'){clock.resume(performance.now());cueKey='';player();tick();}
@@ -201,6 +210,7 @@ async function initialize(){
   await cloudUI.account();toast(googleError||'계정 연결을 확인하지 못했어요. 다시 로그인해주세요.');return;
  }
  if(view==='home')loadHomeFeed(viewEpoch);if(initialHash)history.replaceState(null,'',initialHash);await routeHash();
+ if(!await safetySeen())showSafetyNotice();
  }finally{if(callback.active){authCallbackPending=false;document.body.inert=false;main.focus({preventScroll:true});}}
 }
 window.addEventListener('hashchange',()=>routeHash().catch(e=>toast(e.message)));

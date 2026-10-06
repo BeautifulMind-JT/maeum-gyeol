@@ -33,6 +33,7 @@ async function harness(){
   createPhotoLoader:()=>({release(){},hydrate(){}}),createCloudUI:()=>({}),createServerJournal:remote=>remote,
   createStorageAdapter:()=>({}),bindLifecycle:async()=>{},shareMoment:async()=>{},stopSpeech(){},icon:()=>'',esc:value=>String(value??''),
   stageOf:()=>({label:'머무르기'}),entryImage:()=>'',entryHeading:r=>r.context,momentCard:r=>r.note,emptyJournal:()=>'',
+  openExternal:async()=>{},POLICY_URLS:{terms:'',privacy:'',support:''},crisisNoticeMarkup:()=>'',
   __cloud:cloud,
  });
  vm.runInContext(uiSource+`\ncloud=__cloud;globalThis.app={action,editor,detail,changeUser,snapshot:()=>({view,draft,record,account:accountUser?.id})};`,context,{filename:'main.mjs'});
@@ -137,6 +138,7 @@ function authHarness({callback=false,kind='account',exchangeError=false,exchange
   createAuthStorage:()=>({}),loadCloud:async()=>{events.push({type:'network',href:location.href});return cloud;},captureOAuthCallback,
   bindLifecycle:async()=>{},shareMoment:async()=>{},stopSpeech(){},speak:async()=>{},icon:()=>'',esc:value=>String(value??''),
   newId:()=>'new-private-record',stageOf:()=>({label:'머무르기'}),entryImage:()=>'',entryHeading:r=>r.context,momentCard:r=>r.note,emptyJournal:()=>'',stats:()=>'',
+  openExternal:async()=>{},POLICY_URLS:{terms:'',privacy:'',support:''},crisisNoticeMarkup:()=>'',
  });
  vm.runInContext('globalThis.createCloudUI=(()=>{'+cloudUISource+'\nreturn createCloudUI;})();',context,{filename:'cloud-ui.mjs'});
  vm.runInContext(uiSource+`\nglobalThis.app={initialize,startGoogle,googleLoginBlocked,action,editor,

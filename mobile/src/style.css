@@ -163,3 +163,13 @@ input,textarea,select{scroll-margin-block:84px 130px}
  .header-back{position:static;width:44px;height:44px;margin:-6px -28px -6px -14px}
  .header-write{min-height:44px;padding:10px 14px}
 }
+
+/* Policy links, sign-up consent and the crisis notice (App Review items). */
+.inline-link{display:inline;padding:0;font-size:inherit;color:var(--wine);text-decoration:underline;text-underline-offset:3px;min-height:0}
+.consent-field{align-items:flex-start;line-height:1.7}.consent-field input{margin-top:3px;flex-shrink:0}
+.policy-links{margin:-8px 0 20px}
+.settings-policies{border-top:1px solid var(--line);margin-top:28px;padding-top:6px}
+.crisis-lines{list-style:none;margin:16px 0 4px;padding:0}
+.crisis-lines li{display:flex;align-items:baseline;gap:12px;border:1px solid var(--line);border-radius:5px;padding:10px 14px;margin:8px 0}
+.crisis-lines a{font-size:18px;font-weight:700;text-decoration:none;white-space:nowrap}
+.crisis-lines span{font-size:14px;color:var(--muted)}
