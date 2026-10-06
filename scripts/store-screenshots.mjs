@@ -55,6 +55,7 @@ async function ready(page) {
 }
 
 async function hideChrome(page) {
+  if (await page.locator('dialog[open]').count()) await page.click('dialog [data-action="close"]');
   await page.addStyleTag({content: ':root{--sans:"Nanum Gothic","Noto Sans KR",sans-serif}.toast,.toast.visible{display:none!important;opacity:0!important}'});
   await page.evaluate(() => {
     const toast = document.querySelector('.toast');
@@ -74,6 +75,19 @@ async function hideChrome(page) {
     walk(document.body);
     document.activeElement?.blur?.();
   });
+}
+
+async function assertStoreClean(page, name) {
+  const problems = await page.evaluate(() => {
+    const issues = [];
+    if (document.querySelector('dialog[open]')) issues.push('open dialog overlay');
+    if (document.querySelector('.toast.visible')) issues.push('toast');
+    const text = document.body.innerText || '';
+    if (/불러오고|미리보기:|preview@example\.test|reviewer@example\.test/.test(text)) issues.push('loading or preview-only copy');
+    if (/이 기록을 신고하기|이 계정을 차단할까요|안전 안내를 전해요|댓글을 지울까요/.test(text)) issues.push('modal copy on a dimmed overlay');
+    return issues;
+  });
+  if (problems.length) throw Error(name + ' is not store-clean: ' + problems.join(', '));
 }
 
 async function openApp(page) {
@@ -137,29 +151,29 @@ async function prepareLibrary(page) {
 }
 
 async function prepareCommunity(page) {
+  if (await page.locator('dialog[open]').count()) await page.click('dialog [data-action="close"]');
   await clickAction(page, 'together');
   await page.waitForSelector('.community-feed');
   await page.waitForSelector('text=수연');
-  await page.waitForSelector('text=머무는 사람');
   const suyeonPost = page.locator('.review-card:has-text("수연"), .community-feed .moment-card:has-text("비 그친 오후")').first();
   await suyeonPost.click();
-  await page.waitForSelector('.public-record [data-social-action="report-preview"]');
-  await page.locator('.person-link:has-text("수연")').first().click();
-  await page.waitForSelector('.public-profile [data-social-action="block-preview"]');
-  await page.click('[data-social-action="block-preview"]');
-  await page.waitForSelector('text=이 계정을 차단할까요?');
-  await page.click('[data-action="close"]');
-  await page.waitForFunction(() => !document.querySelector('dialog')?.open);
-  await page.locator('.public-profile [data-social-action="post"], .moment-card:has-text("비 그친 오후")').first().click();
-  await page.waitForSelector('.public-record [data-social-action="report-preview"]');
-  await page.click('[data-social-action="report-preview"]');
-  await page.waitForSelector('#social-report');
-  await page.waitForSelector('text=24시간 이내에 검토');
+  await page.waitForSelector('.public-record');
+  await page.waitForSelector('[data-social-action="report-preview"]');
+  await page.waitForSelector('.cloud-comment');
   await ready(page);
+  await page.evaluate(() => {
+    window.scrollTo(0, 0);
+    document.querySelector('[data-social-action="report-preview"]')?.scrollIntoView({block: 'nearest'});
+    document.activeElement?.blur?.();
+  });
+  const reportBox = await page.locator('[data-social-action="report-preview"]').boundingBox();
+  if (!reportBox || reportBox.y + reportBox.height < 0 || reportBox.y > page.viewportSize().height) {
+    throw Error('community 신고 control is not in the viewport');
+  }
 }
 
 async function prepareSettings(page) {
-  if (await page.locator('dialog[open]').count()) await page.click('[data-action="close"]');
+  if (await page.locator('dialog[open]').count()) await page.click('dialog [data-action="close"]');
   await clickAction(page, 'home');
   await page.waitForSelector('.summer-hero');
   await page.click('header [data-cloud-action="account"]');
@@ -167,12 +181,17 @@ async function prepareSettings(page) {
   if (await page.locator('[data-action="settings"]').count()) {
     await clickAction(page, 'settings');
   }
-  await page.waitForSelector('.settings-page');
+  await page.waitForSelector('.settings-page [data-action="safety-notice"]');
   await hideChrome(page);
-  await page.click('[data-action="safety-notice"]');
-  await page.waitForSelector('text=안전 안내를 전해요');
-  await page.waitForSelector('text=1577-0199');
   await ready(page);
+  await page.evaluate(() => {
+    const row = document.querySelector('.settings-policies');
+    if (row) {
+      const top = row.getBoundingClientRect().top + window.scrollY;
+      window.scrollTo(0, Math.max(0, top - 24));
+    }
+    document.activeElement?.blur?.();
+  });
 }
 
 const prepare = {
@@ -215,6 +234,7 @@ async function captureDevice(browser, device) {
     for (const screen of STORE_SCREENS) {
       await prepare[screen.name](page);
       await hideChrome(page);
+      await assertStoreClean(page, device.id + '/' + screen.file);
       await new Promise(resolve => setTimeout(resolve, 160));
       const png = pngToOpaqueRgb(await page.screenshot({type: 'png', animations: 'disabled', caret: 'hide'}));
       await writeFile(device.dir + '/' + screen.file, png);
