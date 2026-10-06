@@ -6,6 +6,7 @@
   "scripts": {
     "build": "node build.mjs",
     "build:android": "node scripts/build-android.mjs",
+    "build:ios": "node scripts/build-ios-release.mjs",
     "sync": "npm run build && cap sync",
     "android": "cap open android",
     "ios": "cap open ios",
