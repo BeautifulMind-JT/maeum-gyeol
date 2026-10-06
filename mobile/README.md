@@ -18,4 +18,22 @@ Android는 JDK 21, Android SDK 36, Build Tools 35.0.0 환경에서 빌드합니�
 
 iOS는 macOS/Xcode에서 자신의 Signing Team을 설정해야 합니다. 이 환경에서 iOS 컴파일과 실기기 실행은 하지 않았습니다. 버전 소스는 0.7.1/8이지만 새 APK·IPA를 생성하거나 스토어에 올리지 않았습니다.
 
+## iOS 릴리스 빌드 · 서명 · TestFlight
+
+macOS + Xcode(Capacitor 8 기준 Xcode 16 이상)에서 실행합니다. Team ID는 저장소에 넣지 않고 환경 변수로 주입합니다.
+
+```sh
+MAEUM_SUPABASE_URL=... \
+MAEUM_SUPABASE_PUBLISHABLE_KEY=... \
+MAEUM_IOS_TEAM_ID=XXXXXXXXXX \
+npm run build:ios
+```
+
+- `MAEUM_IOS_TEAM_ID`는 [Apple Developer Membership](https://developer.apple.com/account)의 10자리 Team ID입니다. 스크립트가 `xcodebuild`의 `DEVELOPMENT_TEAM`으로 전달하고, `ios/App/ExportOptions.plist`의 `MAEUM_IOS_TEAM_ID` 자리표시자를 치환한 사본을 `ios/App/build/`(커밋 제외)에 만들어 사용합니다. 템플릿에 실제 Team ID를 커밋하지 않습니다.
+- 스토어 모드(`MAEUM_BUILD_MODE=store`, 스크립트가 자동 설정)에서는 Supabase 두 변수가 없으면 빌드가 즉시 실패합니다. 계정 기능이 꺼진 빌드가 스토어에 올라가는 일을 막기 위함입니다. 공개 값은 `../config/production-public.json`에 있습니다.
+- 서명은 자동 서명(`-allowProvisioningUpdates`)을 사용합니다. Xcode에 App Store Connect 계정이 로그인되어 있어야 하며, 인증서·프로비저닝 프로파일은 저장소에 두지 않습니다.
+- 성공하면 `ios/App/build/export/App.ipa`가 생성됩니다. Transporter 앱이나 Xcode Organizer로 App Store Connect에 올린 뒤 TestFlight에서 배포합니다.
+- 첫 제출 전에 App Store Connect에서 앱 생성(번들 ID `app.maeumgyeol.mobile`), 기본 언어(한국어), 개인정보 처리방침 URL, 심사용 데이터 수집 설문(이메일·사용자 ID·사진·사용자 콘텐츠, 계정 연결, 추적 없음 — `ios/App/App/PrivacyInfo.xcprivacy`와 일치)을 준비해야 합니다.
+- iPhone 전용/유니버설(`TARGETED_DEVICE_FAMILY`) 결정과 실기기 검증은 아직 남아 있습니다.
+
 운영 DB에는 서버 초안 마이그레이션이 적용되어 있습니다. 저장소와 운영 이력의 대응은 `../docs/migration-map.json`을 확인합니다. M1·M2 실제 이용 검증과 최신 설치본 검증은 아직 별도 단계입니다.
