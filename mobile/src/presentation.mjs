@@ -17,3 +17,13 @@ export function emptyJournal(){return `<div class="moment-grid first-moments"><b
 
 export function entryImage(r){return `<div class="entry-photo"><img src="./${r.wineName?'summer-wine.webp':'summer-still.webp'}" ${r.photoPath?'data-photo="'+esc(r.photoPath)+'" data-photo-size="full"':''} alt="이 순간의 사진"></div>`;}
 export function entryHeading(r){return `${r.wineName||r.vintage?'<p class="entry-wine">'+esc(r.wineName||'함께한 와인')+(r.vintage?' · '+esc(r.vintage):'')+'</p>':''}<h1>${esc(r.context||'지금의 마음')}</h1>`;}
+
+// Group in the viewer's local calendar, including records around UTC midnight.
+export function diaryRows(entries){
+ let last='';
+ return '<div class="diary-list">'+entries.map(r=>{
+  const date=new Date(r.date),month=date.toLocaleDateString('ko-KR',{year:'numeric',month:'long'});
+  const heading=month===last?'':'<h2 class="diary-date">'+esc(month)+'</h2>';last=month;
+  return heading+'<button class="diary-row" data-action="entry" data-id="'+esc(r.id)+'"><time class="diary-day" datetime="'+esc(r.date)+'"><strong>'+date.getDate()+'</strong><span>'+date.toLocaleDateString('ko-KR',{weekday:'short'})+'</span></time>'+cover(r,true)+'<span class="diary-copy"><span class="diary-title">'+esc(r.context||r.wineName||'지금의 마음')+'</span><span class="stage-label">'+esc(stageOf(r).label)+'</span><span class="card-note">'+esc(r.note)+'</span></span><span class="diary-privacy">'+(r.visibility==='public'?'공개':icon('lock')+' 나만')+'</span></button>';
+ }).join('')+'</div>';
+}

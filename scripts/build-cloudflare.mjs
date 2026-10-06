@@ -1,5 +1,5 @@
 import {cp, mkdir, readdir, rm, stat, writeFile} from 'node:fs/promises';
-import {spawnSync} from 'node:child_process';
+import {spawnSync,execFileSync} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
 import {join} from 'node:path';
 
@@ -15,6 +15,10 @@ await rm(output,{recursive:true,force:true});
 await mkdir(output,{recursive:true});
 await cp('vercel-dist/mobile',join(output,'mobile'),{recursive:true});
 await cp('vercel-dist/index.html',join(output,'index.html'));
+// Public build identity lets operators distinguish an old deployment from a cache issue.
+const commit=process.env.CF_PAGES_COMMIT_SHA||process.env.GITHUB_SHA||execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim();
+if(!/^[a-f0-9]{40}$/i.test(commit))throw Error('A full source commit SHA is required.');
+await writeFile(join(output,'version.json'),JSON.stringify({commit,target:'Cloudflare Pages',appPath:'/mobile/'})+'\n');
 await writeFile(join(output,'_redirects'),[
  '/ /mobile/ 302',
  '/legacy https://maeum-gyeol.justice-parkit.chatgpt.site/legacy/ 302',
@@ -30,6 +34,8 @@ await writeFile(join(output,'_headers'),[
  '  X-Robots-Tag: noindex',
  '/mobile/sw.js',
  '  Cache-Control: no-cache',
+ '/version.json',
+ '  Cache-Control: no-store',
  '/mobile/cloud-config.json',
  '  Cache-Control: no-store',
  '',

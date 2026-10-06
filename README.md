@@ -10,9 +10,9 @@
 
 앱 0.7.1의 소스 동기화와 재현 검사는 [M0 실행 명세](docs/M0-IMPLEMENTATION.md)와 [릴리스 기록](docs/release-0.7.1.md)에서 관리합니다. M0의 검증 범위는 실제 이용 안정성과 구분합니다.
 
-## 1안: 여름의 표지
+## 여름의 표지와 기록 서재
 
-선택된 시안은 `docs/design-evidence/option1-selected.png`입니다. 코발트 홈, 노란 손글씨와 시작 버튼, 흰 바탕의 개인 서재와 기록 상세를 구현했습니다. 기록 제목은 명조, 본문은 진한 17px 글씨로 표시합니다. 오늘·발견·내 기록 세 탭을 유지합니다.
+선택된 시안은 `docs/design-evidence/option1-selected.png`입니다. 코발트 홈, 노란 손글씨와 시작 버튼, 흰 바탕의 개인 서재와 기록 상세를 구현했습니다. 기록 제목은 명조, 본문은 진한 17px 글씨로 표시합니다. 오늘·발견·내 서재 세 탭을 유지합니다. 표지형 서재, 월별 다이어리, 공개 리뷰 목록과 대표 기록을 중심으로 탐색하며 별점이나 순위를 추가하지 않습니다.
 
 - 알아차림 → 허용하기 → 돌아오기 → 머무르기, 3분 안내와 일시정지/재개.
 - 와인 이름·빈티지·상황·마음 기록·개인 돌아보기·선택 사진.
@@ -44,13 +44,13 @@
 ```sh
 npm test
 npm --prefix mobile test
-npm run build:production
+npm run build
 npm run release:manifest
 node scripts/check-source.mjs
 npm run dev -- --host 0.0.0.0 --port 4173
 ```
 
-`build:production`은 `config/production-public.json`의 공개 설정을 사용합니다. 외부 환경으로 빌드할 때는 `build:vercel`에 `MAEUM_SUPABASE_URL`, `MAEUM_SUPABASE_PUBLISHABLE_KEY`를 제공합니다. URL과 공개용 `sb_publishable_` 키만 번들에 포함합니다. 설정 없이 빌드하면 연습만 가능하며 기기 저장 모드로 전환하지 않습니다.
+`build`와 `build:cloudflare`는 `config/production-public.json`의 공개 설정으로 Cloudflare Pages 산출물 `cloudflare-dist/`를 만듭니다. 이전 Sites/D1 빌드는 `build:legacy`로 명시적으로 실행합니다. 외부 환경으로 빌드할 때는 `build:vercel`에 `MAEUM_SUPABASE_URL`, `MAEUM_SUPABASE_PUBLISHABLE_KEY`를 제공합니다. URL과 공개용 `sb_publishable_` 키만 번들에 포함합니다. 설정 없이 빌드하면 연습만 가능하며 기기 저장 모드로 전환하지 않습니다.
 
 개발 서버 `/preview/`는 테스트용 PostgreSQL(PGlite)과 예시 계정을 사용합니다. `/`의 화면 크기·초안 오류·응답 유실 버튼으로 재현할 수 있습니다. `tests/fixtures/`는 운영 번들에 포함되지 않습니다. 운영 연결 없이 UI와 실제 SQL 트랜잭션을 함께 검증하기 위한 환경입니다.
 
@@ -58,11 +58,9 @@ SQL 테스트는 소유권, 익명 접근 금지, 다른 계정/기기의 충돌
 
 ## 운영과 소스
 
-웹 앱: https://maeum-gyeol.vercel.app/mobile/ · 기존 웹 주소: https://maeum-gyeol.justice-parkit.chatgpt.site
+웹 앱: [마음결 Cloudflare Pages](https://maeum-gyeol.pages.dev/mobile/). 배포 브랜치·빌드·중복 호스트 정리 기준은 [호스팅 문서](docs/HOSTING.md)를 따릅니다. 운영 기준은 `main`이며, 대시보드 설정은 별도로 일치시켜야 합니다. 배포의 실제 소스 커밋은 `/version.json`에서 확인합니다.
 
-2026-09-12 확인: Vercel은 선택된 0.7.0 디자인과 정적 자산 캐시 수정을 제공합니다. 서비스 워커는 온라인에서 최신 정적 파일을 먼저 받고 연결이 끊기면 저장된 정적 자산을 사용합니다. 계정 설정과 API 응답은 캐시하지 않으며, 업데이트 때문에 작성 중인 화면을 강제로 새로고침하지 않습니다.
-
-Supabase 전용 프로젝트는 `vmvtpolyszkyachlqlki`, Vercel 프로젝트는 `prj_1AzuGFjZoKshpFpqzJT5qASWhylw`입니다. 2026-09-11 연결 점검에서 서버 전용 초안 마이그레이션과 `mg_commit_draft`, `mg_save_entry` 적용을 확인했습니다. 기존 프로젝트에 `supabase/schema.sql` 전체를 중복 실행하지 않습니다.
+Supabase 전용 프로젝트는 `vmvtpolyszkyachlqlki`입니다. 기존 프로젝트에 `supabase/schema.sql` 전체를 중복 실행하지 않습니다.
 
 전체 소스 저장소: https://github.com/BeautifulMind-JT/maeum-gyeol (비공개). 기존 Sites 소스 저장소도 유지합니다. 환경설정·비밀 키·서명 파일은 포함하지 않습니다. 이전 Sites/D1 웹앱 소스와 데이터는 보존하며 `/legacy/`에서 이전 화면을 제공합니다.
 
