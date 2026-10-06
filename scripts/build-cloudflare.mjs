@@ -1,7 +1,8 @@
-import {cp, mkdir, readdir, rm, stat, writeFile} from 'node:fs/promises';
+import {cp, mkdir, readdir, readFile, rm, stat, writeFile} from 'node:fs/promises';
 import {spawnSync,execFileSync} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
 import {join} from 'node:path';
+import {policyPages} from './policy-pages.mjs';
 
 const root=fileURLToPath(new URL('../',import.meta.url));
 process.chdir(root);
@@ -40,6 +41,14 @@ await writeFile(join(output,'_headers'),[
  '  Cache-Control: no-store',
  '',
 ].join('\n'));
+// Public legal/support pages required by app-store review (privacy, terms, support).
+const operator=JSON.parse(await readFile('config/operator.json','utf8'));
+for(const page of policyPages(operator)){
+ await mkdir(join(output,page.path,'..'),{recursive:true});
+ await writeFile(join(output,page.path),page.html);
+}
+const pending=JSON.stringify(operator).match(/\{\{[A-Z0-9_]+\}\}/g)||[];
+if(pending.length)console.warn('Policy pages still carry operator placeholders: '+[...new Set(pending)].join(', '));
 // Disable Pages' implicit SPA fallback: missing assets must return a real 404.
 await writeFile(join(output,'404.html'),'<!doctype html><html lang="ko"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>페이지를 찾을 수 없어요 · 마음결</title><h1>페이지를 찾을 수 없어요.</h1><a href="/mobile/">마음결로 돌아가기</a></html>\n');
 
